@@ -16,6 +16,7 @@ typedef unsigned char _BYTE;
 void (*old_StoreScreen_AddedToManager)(int *a, int a2);
 
 void StoreScreen_AddedToManager(int *a, int a2) {
+
     return old_StoreScreen_AddedToManager(a, a2);
 }
 

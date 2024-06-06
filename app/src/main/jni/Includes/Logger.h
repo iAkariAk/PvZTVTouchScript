@@ -17,6 +17,8 @@ enum LogType {
     oWARN  = 5
 };
 
+
+//    adb logcat -s Mod_Menu
 #define TAG "Mod_Menu"
 
 #define LOGD(...) ((void)__android_log_print(oDEBUG, TAG, __VA_ARGS__))

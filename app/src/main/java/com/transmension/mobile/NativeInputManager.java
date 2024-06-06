@@ -1,5 +1,6 @@
 package com.transmension.mobile;
 
+/* loaded from: classes.dex */
 public class NativeInputManager {
     public static native void onJoystickEventNative(long j, InputManager inputManager, InputManager.JoystickEvent joystickEvent);
 

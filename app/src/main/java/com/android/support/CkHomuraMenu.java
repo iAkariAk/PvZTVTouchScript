@@ -48,7 +48,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.trans.pvz.R;
+import com.trans.pvztv.R;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -69,7 +69,7 @@ public class CkHomuraMenu {
     int POS_X = 150;
     int POS_Y = 150;
 
-    // float MENU_CORNER = 4f;
+   // float MENU_CORNER = 4f;
     int ICON_SIZE = 45;
     int ToggleON = Color.CYAN;
     int ToggleOFF = Color.RED;
@@ -888,7 +888,7 @@ public class CkHomuraMenu {
     }
 
     private void RadioButton(LinearLayout linLayout, final int featNum, String featName, final String list) {
-        //Credit: LoraZalora
+        //CreditsPhase: LoraZalora
         final List<String> lists = new LinkedList<>(Arrays.asList(list.split(",")));
 
         final TextView textView = new TextView(getContext);

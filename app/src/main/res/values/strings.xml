@@ -67,7 +67,7 @@
     <string name="addon_ingame_newoptions">Xbox版暂停菜单</string>
     <string name="addon_ingame_usexboxmusics">Xbox版背景音乐</string>
     <string name="addon_ingame_dynamicpreview_info">动态种植预览可能在某些设备上导致卡顿。此外，触控版的动态预览机制与主机版存在一定差别，以更加适应触控和按键操作逻辑。</string>
-    <string name="addon_ingame_usexboxmusics_info">Xbox版背景音乐有和PC版一致的鼓点和变奏机制。但缺点是存在约0.2秒的播放延迟，切音乐时可能会响一段鼓点，鼓点音轨对不上常规音轨等BUG，且为\".xm\"格式不易修改。\n\n关闭后，游戏将使用TV版默认的ogg格式音乐。</string>
+    <string name="addon_ingame_usexboxmusics_info">Xbox版背景音乐有和PC版一致的鼓点和变奏机制。但缺点是存在约0.2秒的播放延迟，切音乐时可能会响一段鼓点等BUG，且为\".xm\"格式不易修改。\n\n关闭后，游戏将使用TV版默认的ogg格式音乐。</string>
     <string name="addon_ingame_showcooldown_info">开启后可显示卡片冷却秒数。</string>
     <string name="addon_ingame_newoptions_info">Xbox版暂停菜单拥有更多设置功能。</string>
     <string name="addon_ingame_disabletrashbin_info">TV版的生存模式关卡出怪默认包含垃圾桶僵尸，该僵尸的刷新权重与普僵相同，特性类似铁网门。关闭它后，生存关卡出怪几乎与PC版完全一致。</string>

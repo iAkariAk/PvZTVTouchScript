@@ -29,11 +29,11 @@ static ProcMap findMapInCache(std::string id){
 
 
 bool KittyMemory::ProtectAddr(void *addr, size_t length, int protection) {
-   uintptr_t pageStart = _PAGE_START_OF_(addr);
-   uintptr_t pageLen   = _PAGE_LEN_OF_(addr, length);
-   return (
-     mprotect(reinterpret_cast<void *>(pageStart), pageLen, protection) != -1
- );
+    uintptr_t pageStart = _PAGE_START_OF_(addr);
+    uintptr_t pageLen   = _PAGE_LEN_OF_(addr, length);
+    return (
+            mprotect(reinterpret_cast<void *>(pageStart), pageLen, protection) != -1
+    );
 }
 
 
@@ -139,7 +139,7 @@ uintptr_t KittyMemory::getAbsoluteAddress(const char *libraryName, uintptr_t rel
     if(useCache){
         libMap = findMapInCache(libraryName);
         if(libMap.isValid())
-        return (reinterpret_cast<uintptr_t>(libMap.startAddr) + relativeAddr);
+            return (reinterpret_cast<uintptr_t>(libMap.startAddr) + relativeAddr);
     }
 
     libMap = getLibraryMap(libraryName);

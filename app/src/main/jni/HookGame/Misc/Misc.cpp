@@ -1299,12 +1299,6 @@ void LawnPlayerInfo_AddCoins(PlayerInfo *playerInfo, int theAmount) {
     }
 }
 
-bool LawnPlayerInfo_EnableZombatar(PlayerInfo *playerInfo,ZombieType::ZombieType type) {
-    return (playerInfo->mZombatarHat != 255 || playerInfo->mZombatarHair != 255 ||
-            playerInfo->mZombatarFacialHair != 255 || playerInfo->mZombatarAccessory != 255 ||
-            playerInfo->mZombatarTidBit != 255 || playerInfo->mZombatarEyeWear != 255);
-}
-
 Sexy::GameButton* mCreditScreenBackButton = NULL;
 
 void (*old_CreditScreen_CreditScreen)(Sexy::Widget *a, LawnApp *a2, bool a3);

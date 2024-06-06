@@ -33,7 +33,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.trans.pvz.R;
+import com.trans.pvztv.R;
 
 public class ButtonSetActivity extends Activity {
     boolean isAddonWindowLoaded = false;

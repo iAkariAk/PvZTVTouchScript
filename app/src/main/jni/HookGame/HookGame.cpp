@@ -461,6 +461,7 @@ void InitInGameFunction() {
     Sexy_SexyTransform2D_SexyTransform2D = (void (*)(SexyTransform2D *)) Sexy_SexyTransform2D_SexyTransform2DAddr;
     Sexy_SexyTransform2D_Scale = (void (*)(SexyTransform2D *, float, float)) Sexy_SexyTransform2D_ScaleAddr;
     Sexy_SexyTransform2D_Translate = (void (*)(SexyTransform2D *, float,float)) Sexy_SexyTransform2D_TranslateAddr;
+    Sexy_SexyTransform2D_RotateRad=(void (*)(SexyTransform2D *, float))Sexy_SexyTransform2D_RotateRadAddr;
 
 
     SeedPacket_DrawBackground = (void (*)(SeedPacket *, Sexy::Graphics *)) SeedPacket_DrawBackgroundAddr;

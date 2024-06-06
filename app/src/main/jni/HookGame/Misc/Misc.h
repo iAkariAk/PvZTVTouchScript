@@ -73,6 +73,8 @@ void (*Sexy_SexyTransform2D_Scale)(SexyTransform2D *, float, float);
 
 void (*Sexy_SexyTransform2D_Translate)(SexyTransform2D *, float, float);
 
+void (*Sexy_SexyTransform2D_RotateRad)(SexyTransform2D *, float);
+
 bool (*GameObject_BeginDraw)(int *, float *);
 
 void (*GameObject_EndDraw)(int *, float *);
@@ -252,6 +254,4 @@ void (*TestMenuWidget_TestMenuWidget)(ZombatarWidget* );
 void (*Sexy_SexyAppBase_EraseFile)(SexyAppBase*, int*);
 
 void (*SaveGameContext_SyncInt)(int*,int*);
-
-bool LawnPlayerInfo_EnableZombatar(PlayerInfo *playerInfo,ZombieType::ZombieType);
 #endif //PVZ_TV_1_1_5_MISC_H

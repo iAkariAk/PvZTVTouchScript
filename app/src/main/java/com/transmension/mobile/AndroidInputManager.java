@@ -6,10 +6,11 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-
+import com.transmension.mobile.InputManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

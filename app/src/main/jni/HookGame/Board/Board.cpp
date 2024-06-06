@@ -104,14 +104,8 @@ void Board_ShovelDown(Board *board) {
 
 void Board_UpdateGame(Board *board) {
     if (requestPause) {
-        board->mMainCounter--;
-        if (board->mIceTrapCounter > 0) {
-            board->mIceTrapCounter++;
-        }
-        if (board->mFogBlownCountDown > 0) {
-            board->mFogBlownCountDown++;
-            board->mFogBlownCountDown++;
-        }
+        Board_UpdateGameObjects(board);
+        return;
     }
 
 
@@ -778,9 +772,6 @@ void Board_UpdateFwoosh(Board *board) {
 
 
 void Board_UpdateFog(Board *board) {
-    if (requestPause) {
-        return;
-    }
     old_Board_UpdateFog(board);
 }
 

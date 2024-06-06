@@ -84,7 +84,7 @@ void Challenge_Challenge(Challenge *challenge) {
 void (*old_Challenge_HeavyWeaponFire)(Challenge *challenge, float a2, float a3);
 
 void Challenge_HeavyWeaponFire(Challenge *challenge, float a2, float a3) {
-    //设定重型武器的发射角度
+    //设定重型武器子弹的发射角度
     if (a2 == 0 && a3 == 1) {
         a2 = angle1;
         a3 = angle2;
@@ -92,19 +92,34 @@ void Challenge_HeavyWeaponFire(Challenge *challenge, float a2, float a3) {
 //        float mHeavyWeaponPositionY = *((float *) challenge + 68);
 
 //        LOGD("%f",*((float *) challenge + 69));
-//        *((float *) challenge + 69) = acosf(a2) - 1.5708f;
     }
     return old_Challenge_HeavyWeaponFire(challenge, a2, a3);
+}
+
+
+void Challenge_HeavyWeaponReanimUpdate(Challenge *challenge) {
+    Reanimation* heavyWeaponReanim = LawnApp_ReanimationTryToGet(challenge->mApp,challenge->mReanimHeavyWeaponID2);
+    if (heavyWeaponReanim == NULL) return;
+    SexyTransform2D sexyTransform2D;
+    Sexy_SexyTransform2D_SexyTransform2D(&sexyTransform2D);
+    Sexy_SexyTransform2D_Translate(&sexyTransform2D, -129.55, -71.45);
+    Sexy_SexyTransform2D_RotateRad(&sexyTransform2D, challenge->mHeavyWeaponAngle);
+    Sexy_SexyTransform2D_Translate(&sexyTransform2D, challenge->mHeavyWeaponX, challenge->mHeavyWeaponY);
+    Sexy_SexyTransform2D_Translate(&sexyTransform2D, 129.55, 71.45);
+    Sexy_SexyTransform2D_Translate(&sexyTransform2D, 0.0, -20.0);
+    heavyWeaponReanim->mOverlayMatrix = sexyTransform2D;
 }
 
 void (*old_Challenge_HeavyWeaponUpdate)(Challenge *challenge);
 
 void Challenge_HeavyWeaponUpdate(Challenge *challenge) {
-    //设定重型武器的发射角度。未完成
-//    LOGD("%d %d",challenge[72],challenge[71]);
-//    LOGD("%f",*((float *) challenge + 69));
-//    *((float *) challenge + 69) = acosf(angle1) - 1.5708f;
+    //设定重型武器动画的发射角度
     old_Challenge_HeavyWeaponUpdate(challenge);
+
+    if (angle1 != 0) {
+        challenge->mHeavyWeaponAngle = acosf(angle1) - 1.5708f;
+        Challenge_HeavyWeaponReanimUpdate(challenge);
+    }
 }
 
 void Challenge_IZombieDrawPlant(Challenge *challenge, Sexy::Graphics *graphics, Plant *thePlant) {

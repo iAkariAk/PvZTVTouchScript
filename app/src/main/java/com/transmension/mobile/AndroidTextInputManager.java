@@ -136,7 +136,7 @@ public class AndroidTextInputManager implements TextInputManager {
                 sp.removeSpan(changeWatcher);
             }
             if (this.mChangeWatcher == null) {
-                this.mChangeWatcher = new ChangeWatcher(this, null);
+                this.mChangeWatcher = new ChangeWatcher();
             }
             sp.setSpan(this.mChangeWatcher, 0, textLength, (PRIORITY << 16) | 18);
         }
@@ -453,9 +453,6 @@ public class AndroidTextInputManager implements TextInputManager {
         private ChangeWatcher() {
         }
 
-        /* synthetic */ ChangeWatcher(AndroidTextInputManager androidTextInputManager, ChangeWatcher changeWatcher) {
-            this();
-        }
 
         @Override // android.text.TextWatcher
         public void beforeTextChanged(CharSequence buffer, int start, int before, int after) {
@@ -513,7 +510,8 @@ public class AndroidTextInputManager implements TextInputManager {
             return null;
         }
 
-        @Override // android.view.inputmethod.BaseInputConnection, android.view.inputmethod.InputConnection
+        @Override
+        // android.view.inputmethod.BaseInputConnection, android.view.inputmethod.InputConnection
         public boolean beginBatchEdit() {
             synchronized (this) {
                 if (this.mBatchEditNesting >= 0) {
@@ -525,7 +523,8 @@ public class AndroidTextInputManager implements TextInputManager {
             }
         }
 
-        @Override // android.view.inputmethod.BaseInputConnection, android.view.inputmethod.InputConnection
+        @Override
+        // android.view.inputmethod.BaseInputConnection, android.view.inputmethod.InputConnection
         public boolean endBatchEdit() {
             synchronized (this) {
                 if (this.mBatchEditNesting > 0) {
@@ -547,13 +546,15 @@ public class AndroidTextInputManager implements TextInputManager {
             }
         }
 
-        @Override // android.view.inputmethod.BaseInputConnection, android.view.inputmethod.InputConnection
+        @Override
+        // android.view.inputmethod.BaseInputConnection, android.view.inputmethod.InputConnection
         public boolean clearMetaKeyStates(int states) {
             Editable content = getEditable();
             return content != null;
         }
 
-        @Override // android.view.inputmethod.BaseInputConnection, android.view.inputmethod.InputConnection
+        @Override
+        // android.view.inputmethod.BaseInputConnection, android.view.inputmethod.InputConnection
         public boolean commitCompletion(CompletionInfo text) {
             Log.v(TAG, "commitCompletion " + text);
             this.mTextInput.beginBatchEdit(this.mCookie);
@@ -562,14 +563,16 @@ public class AndroidTextInputManager implements TextInputManager {
             return true;
         }
 
-        @Override // android.view.inputmethod.BaseInputConnection, android.view.inputmethod.InputConnection
+        @Override
+        // android.view.inputmethod.BaseInputConnection, android.view.inputmethod.InputConnection
         public boolean performEditorAction(int actionCode) {
             Log.v(TAG, "performEditorAction " + actionCode);
             this.mTextInput.onEditorAction(actionCode);
             return true;
         }
 
-        @Override // android.view.inputmethod.BaseInputConnection, android.view.inputmethod.InputConnection
+        @Override
+        // android.view.inputmethod.BaseInputConnection, android.view.inputmethod.InputConnection
         public boolean performContextMenuAction(int id) {
             Log.v(TAG, "performContextMenuAction " + id);
             this.mTextInput.beginBatchEdit(this.mCookie);
@@ -577,7 +580,8 @@ public class AndroidTextInputManager implements TextInputManager {
             return true;
         }
 
-        @Override // android.view.inputmethod.BaseInputConnection, android.view.inputmethod.InputConnection
+        @Override
+        // android.view.inputmethod.BaseInputConnection, android.view.inputmethod.InputConnection
         public ExtractedText getExtractedText(ExtractedTextRequest request, int flags) {
             Log.v(TAG, "getExtractedText " + request + " with " + flags);
             if (this.mTextInput != null) {
@@ -593,12 +597,14 @@ public class AndroidTextInputManager implements TextInputManager {
             return null;
         }
 
-        @Override // android.view.inputmethod.BaseInputConnection, android.view.inputmethod.InputConnection
+        @Override
+        // android.view.inputmethod.BaseInputConnection, android.view.inputmethod.InputConnection
         public boolean performPrivateCommand(String action, Bundle data) {
             return true;
         }
 
-        @Override // android.view.inputmethod.BaseInputConnection, android.view.inputmethod.InputConnection
+        @Override
+        // android.view.inputmethod.BaseInputConnection, android.view.inputmethod.InputConnection
         public boolean commitText(CharSequence text, int newCursorPosition) {
             Log.i(TAG, "commitText: " + text + " at " + newCursorPosition);
             return super.commitText(text, newCursorPosition);
@@ -658,27 +664,22 @@ public class AndroidTextInputManager implements TextInputManager {
         }
         this.mTextInput = new EditText(this.mContext);
         int type = 1;
-        switch (mode) {
-            case 0:
-                break;
-            case 1:
-                type = 129;
-                break;
-            case 2:
-                type = 17;
-                break;
-            case 3:
-                type = 33;
-                break;
-            case 4:
-                type = 145;
-                break;
+        if (mode == 1) {
+            type = 129;
+        } else if (mode == 2) {
+            type = 17;
+        } else if (mode == 3) {
+            type = 33;
+        } else if (mode == 4) {
+            type = 145;
         }
         this.mTextInput.setInputType(type);
         if (mode == 1) {
             this.mTextInput.setTransformationMethod(PasswordTransformationMethod.getInstance());
         }
         if (mode == 4 || mode == 1) {
+            // from class: com.transmension.mobile.AndroidTextInputManager.1
+// android.text.InputFilter
             InputFilter filter = (source, start, end, dest, dstart, dend) -> {
                 for (int i = start; i < end; i++) {
                     if (!Character.isLetterOrDigit(source.charAt(i)) || source.charAt(i) > '\u007f') {
@@ -694,20 +695,18 @@ public class AndroidTextInputManager implements TextInputManager {
         this.mTextInput.setText(initial);
         builder.setTitle(title);
         builder.setView(this.mTextInput);
-        builder.setPositiveButton("确定", (dialogInterface, i) -> onTextInput(mTextInput.getText().toString()));
-        builder.setNegativeButton("返回", (dialogInterface, i) -> {
-            onTextInput(null);
-            hideTextInputDialog(true);
+        builder.setPositiveButton("确定", (dialog, whichButton) -> AndroidTextInputManager.this.onTextInput(AndroidTextInputManager.this.mTextInput.getText().toString()));
+        builder.setNegativeButton("返回", (dialog, whichButton) -> {
+            AndroidTextInputManager.this.onTextInput(null);
+            AndroidTextInputManager.this.hideTextInputDialog(true);
         });
-        builder.setOnCancelListener(dialogInterface -> {
-            onTextInput(null);
-            hideTextInputDialog(true);
+        builder.setOnCancelListener(dialog -> {
+            AndroidTextInputManager.this.onTextInput(null);
+            AndroidTextInputManager.this.hideTextInputDialog(true);
         });
         this.mTextInputDialog = builder.create();
         this.mTextInputDialog.show();
     }
-
-
 
     @Override // com.transmension.mobile.TextInputManager
     public void hideTextInputDialog() {

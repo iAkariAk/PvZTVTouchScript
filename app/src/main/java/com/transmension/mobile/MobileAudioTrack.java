@@ -2,21 +2,15 @@ package com.transmension.mobile;
 
 import android.media.AudioTrack;
 
-/* compiled from: AudioOutput.java */
-/* loaded from: classes.dex */
 class MobileAudioTrack extends AudioTrack {
     private final int mFrameSize;
 
     public MobileAudioTrack(int streamType, int sampleRateInHz, int channelConfig, int audioFormat, int bufferSizeInBytes, int mode) throws IllegalArgumentException {
         super(streamType, sampleRateInHz, channelConfig, audioFormat, bufferSizeInBytes, mode);
-        if (audioFormat == 2) {
-            this.mFrameSize = getChannelCount() * 2;
-        } else {
-            this.mFrameSize = getChannelCount();
-        }
+        this.mFrameSize = audioFormat == 2 ? getChannelCount() * 2 : getChannelCount();
     }
 
-    @Override // android.media.AudioTrack
+    @Override
     public void play() throws IllegalStateException {
         super.play();
         initBuffer();

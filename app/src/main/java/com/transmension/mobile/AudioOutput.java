@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
 /* loaded from: classes.dex */
 public class AudioOutput {
     byte[] mAudioData = new byte[8192];
-    private MobileAudioTrack mAudioTrack;
+    private MobileAudioTrack mAudioTrack = null;
     private final Context mContext;
 
 //    private native void nativePause();
@@ -47,6 +47,9 @@ public class AudioOutput {
     }
 
     public boolean setup(int sampleRate, int channels, int bits) {
+        if (mContext.getSharedPreferences("data", 0).getBoolean("useOpenSL", true)) {
+            return true;
+        }
         if (mAudioTrack == null && sampleRate == 44100 && channels == 2 && bits == 16) {
             int bufferSize = AudioTrack.getMinBufferSize(sampleRate, 3, 2);
             mAudioTrack = new MobileAudioTrack(3, sampleRate, 3, 2, bufferSize, 1);
@@ -89,14 +92,12 @@ public class AudioOutput {
     }
 
     public synchronized void onPause() {
-//        nativePause();
         if (mAudioTrack != null && mAudioTrack.getPlayState() == 3) {
             mAudioTrack.pause();
         }
     }
 
     public synchronized void onResume() {
-//        nativeResume();
         if (mAudioTrack != null && mAudioTrack.getPlayState() != 3) {
             mAudioTrack.play();
         }

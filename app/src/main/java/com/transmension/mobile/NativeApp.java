@@ -6,13 +6,10 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
 
 /* loaded from: classes.dex */
 public class NativeApp {
     private static boolean mLoaded = false;
-    private static final Set<String> mLoadedLibraries = new HashSet<>();
 
     public static native long loadNativeApp(String str, String str2, Activity activity, View view, String str3, String str4, int i, AssetManager assetManager);
 
@@ -36,8 +33,6 @@ public class NativeApp {
 
     public static native void onStopNative(long j);
 
-    public static native void onWebBrowserClosed(long j);
-
     public static native void processWorksNative(long j);
 
     public static native void unloadNativeApp(long j);
@@ -50,20 +45,23 @@ public class NativeApp {
         boolean loaded = false;
         if (libPaths != null && libPaths.length > 0) {
             String fullName = System.mapLibraryName(name);
-            for (String libPath : libPaths) {
-                File fullPath = new File(libPath, fullName);
-                if (verbose) {
-                    try {
-                        Log.i("jni", "Loading " + fullName + " from " + libPath);
-                    } catch (Throwable ignored) {
+            int length = libPaths.length;
+            int i = 0;
+            while (true) {
+                if (i < length) {
+                    String libPath = libPaths[i];
+                    File fullPath = new File(libPath, fullName);
+                    if (verbose) {
+                        try {
+                            Log.i("jni", "Loading " + fullName + " from " + libPath);
+                        } catch (Throwable th) {
+                            i++;
+                        }
                     }
+                    System.load(fullPath.getAbsolutePath());
+                    loaded = true;
+                    break;
                 }
-                String absPath = fullPath.getAbsolutePath();
-                if (!mLoadedLibraries.contains(absPath)) {
-                    System.load(absPath);
-                    mLoadedLibraries.add(absPath);
-                }
-                loaded = true;
                 break;
             }
         }
@@ -71,12 +69,9 @@ public class NativeApp {
             return true;
         }
         try {
-            if (!mLoadedLibraries.contains(name)) {
-                System.load(name);
-                mLoadedLibraries.add(name);
-            }
+            System.loadLibrary(name);
             loaded = true;
-        } catch (Throwable ignored) {
+        } catch (Throwable th2) {
         }
         return loaded;
     }
@@ -86,14 +81,10 @@ public class NativeApp {
     }
 
     public static boolean load(String[] libPath) {
-        return load("native_code", libPath, null);
+        return load(libPath, null);
     }
 
-    public static boolean load(String mainLib, String[] libPath) {
-        return load(mainLib, libPath, null);
-    }
-
-    public static boolean load(String mainLib, String[] libPath, String[] depends) {
+    public static boolean load(String[] libPath, String[] depends) {
         if (isLoaded()) {
             return true;
         }
@@ -104,7 +95,7 @@ public class NativeApp {
                 }
             }
         }
-        mLoaded = loadLibrary(libPath, mainLib);
+        mLoaded = loadLibrary(libPath, "native_code");
         return mLoaded;
     }
 

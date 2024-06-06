@@ -767,6 +767,7 @@ void *Sexy_SexyMatrix3_SexyMatrix3Addr;
 void *Sexy_SexyTransform2D_SexyTransform2DAddr;
 void *Sexy_SexyTransform2D_ScaleAddr;
 void *Sexy_SexyTransform2D_TranslateAddr;
+void *Sexy_SexyTransform2D_RotateRadAddr;
 void *TodScaleTransformMatrixAddr;
 void *TodDrawStringWrappedAddr;
 void *TodDrawStringMatrixAddr;
@@ -1846,6 +1847,7 @@ bool GetFunctionAddr() {
     Sexy_SexyTransform2D_SexyTransform2DAddr = dlsym(handle, "_ZN4Sexy15SexyTransform2DC2Ev");
     Sexy_SexyTransform2D_ScaleAddr = dlsym(handle, "_ZN4Sexy15SexyTransform2D5ScaleEff");
     Sexy_SexyTransform2D_TranslateAddr = dlsym(handle, "_ZN4Sexy15SexyTransform2D9TranslateEff");
+    Sexy_SexyTransform2D_RotateRadAddr = dlsym(handle, "_ZN4Sexy15SexyTransform2D9RotateRadEf");
     TodScaleTransformMatrixAddr = dlsym(handle,"_Z23TodScaleTransformMatrixRN4Sexy11SexyMatrix3Effff");
     TodDrawStringWrappedAddr = dlsym(handle,"_Z20TodDrawStringWrappedPN4Sexy8GraphicsERKSsRKNS_5TRectIiEEPNS_4FontERKNS_5ColorE23DrawStringJustificationb");
     TodDrawStringMatrixAddr = dlsym(handle,"_Z19TodDrawStringMatrixPN4Sexy8GraphicsEPNS_4FontERKNS_11SexyMatrix3ERKSsRKNS_5ColorE");
@@ -2148,7 +2150,7 @@ bool GetFunctionAddr() {
     Native_AudioOutput_setupAddr = dlsym(handle1, "_ZN6Native11AudioOutput5setupEiii");
     Native_AudioOutput_shutdownAddr = dlsym(handle1, "_ZN6Native11AudioOutput8shutdownEv");
     Native_AudioOutput_writeAddr = dlsym(handle1, "_ZN6Native11AudioOutput5writeEPKvi");
-    j_AGAudioWriteAddr = (void *) ((uintptr_t) Board_UpdateAddr - (uintptr_t) BOARD_UPDATE_ADDR_RELATIVE + (uintptr_t) J_AUDIOWRITE_ADDR_RELATIVE);
+    j_AGAudioWriteAddr =  (void *) ((uintptr_t) Board_UpdateAddr - (uintptr_t) BOARD_UPDATE_ADDR_RELATIVE + (uintptr_t) J_AUDIOWRITE_ADDR_RELATIVE);
     return true;
 }
 

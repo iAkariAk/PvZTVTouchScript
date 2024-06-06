@@ -2,10 +2,10 @@ package com.transmension.mobile;
 
 import android.annotation.SuppressLint;
 import android.hardware.SensorEvent;
+import android.os.Build;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -158,8 +158,7 @@ public interface InputManager {
             return this.mPointers;
         }
 
-        /* JADX INFO: Access modifiers changed from: package-private */
-        public static PointerEvent translate(MotionEvent motionEvent) {
+        static PointerEvent translate(MotionEvent motionEvent) {
             PointerEvent event = new PointerEvent();
             event.mDeviceId = motionEvent.getDeviceId();
             event.mEventTime = motionEvent.getEventTime();
@@ -167,9 +166,7 @@ public interface InputManager {
             event.mAction = motionEvent.getAction();
             event.mActionIndex = motionEvent.getActionIndex();
             event.mSource = motionEvent.getSource();
-            event.mFlags = motionEvent.getFlags();
-
-
+            event.mFlags = motionEvent.getSource();
             for (int i = 0; i < motionEvent.getPointerCount(); i++) {
                 Pointer p = new Pointer();
                 p.mId = motionEvent.getPointerId(i);
@@ -178,14 +175,6 @@ public interface InputManager {
                 p.mPressure = motionEvent.getPressure(i);
                 event.mPointers.add(p);
             }
-
-//            Pointer p = new Pointer();
-//            p.mId = 0;
-//            p.mX = motionEvent.getX();
-//            p.mY = motionEvent.getY();
-//            p.mPressure = 0;
-//            event.mPointers.add(p);
-
             return event;
         }
     }
@@ -205,8 +194,7 @@ public interface InputManager {
             return this.mActionIndex;
         }
 
-        /* JADX INFO: Access modifiers changed from: package-private */
-        public static JoystickEvent translate(MotionEvent motionEvent) {
+        static JoystickEvent translate(MotionEvent motionEvent) {
             JoystickEvent event = new JoystickEvent();
             event.mDeviceId = motionEvent.getDeviceId();
             event.mEventTime = motionEvent.getEventTime();
@@ -214,7 +202,7 @@ public interface InputManager {
             event.mAction = motionEvent.getAction();
             event.mActionIndex = motionEvent.getActionIndex();
             event.mSource = motionEvent.getSource();
-            event.mFlags = motionEvent.getFlags();
+            event.mFlags = motionEvent.getSource();
             InputDevice device = motionEvent.getDevice();
             for (InputDevice.MotionRange range : device.getMotionRanges()) {
                 Axis a = new Axis();
@@ -259,8 +247,7 @@ public interface InputManager {
             return this.mCharacters;
         }
 
-        /* JADX INFO: Access modifiers changed from: package-private */
-        public static KeyInputEvent translate(KeyEvent keyEvent) {
+        static KeyInputEvent translate(KeyEvent keyEvent) {
             KeyInputEvent event = new KeyInputEvent();
             event.mDeviceId = keyEvent.getDeviceId();
             event.mEventTime = keyEvent.getEventTime();

@@ -515,7 +515,7 @@ V币不足阿～亲～
 {FLAVOR}坚果说：“人们想知道，经常被僵尸啃的感觉怎样？他们不知道，我有限的感官，只能让我感到一种麻麻的感觉，就像是令人放松的背部按摩。”
 
 [CHERRY_BOMB_DESCRIPTION_HEADER]
-樱桃炸弹，能炸掉一定范围内的全部僵尸。他们只有很短的引线，一种下就会立刻引爆，所以请把他们种在僵尸身边。
+樱桃炸弹，能炸掉一定范围内的全部僵尸。他们只有很短的引线，一种下就会立刻引爆，所以请把他们种在僵尸身边。 
 
 [CHERRY_BOMB_DESCRIPTION]
 {SHORTLINE}
@@ -619,7 +619,7 @@ V币不足阿～亲～
 {KEYWORD}特点：{STAT}让一只僵尸为你作战
 {NOCTURNAL}白天要睡觉
 {SHORTLINE}
-{FLAVOR}迷惑菇声称：“僵尸们是我们的朋友，他们被严重误解了，僵尸们在我们的生态环境里扮演着重要角色。我们可以也应当更努力地让他们学会用我们的方式来思考。”
+{FLAVOR}迷惑菇声称：“僵尸们是我们的朋友，他们被严重误解了，僵尸们在我们的生态环境里扮演着重要角色。我们可以也应当更努力地让他们学会用我们的方式来思考。” 
 
 [SCAREDY_SHROOM_DESCRIPTION_HEADER]
 胆小菇是一种远程射手，敌人接近后会躲起来。
@@ -736,7 +736,7 @@ V币不足阿～亲～
 他不识字！
 
 [TALL_NUT_DESCRIPTION_HEADER]
-高坚果是重型壁垒植物，而且不会被跳过。
+高坚果是重型壁垒植物，而且不会被跳过。 
 
 [TALL_NUT_DESCRIPTION]
 {SHORTLINE}
@@ -765,7 +765,7 @@ V币不足阿～亲～
 {KEYWORD}范围：{STAT}一片圆形区域
 {KEYWORD}特点：{STAT}驱散战场迷雾
 {SHORTLINE}
-{FLAVOR}路灯花拒绝科学，他只会埋头苦干。其他植物吃的是光，挤出的是氧气。路灯花吃的是黑暗，挤出的却是光。对于他如何能产生光这件事，路灯花持谨慎态度。“我不会说这是‘巫术’，我也不会使用‘原力的黑暗面’，我只是……我想我说得够多的了。”
+{FLAVOR}路灯花拒绝科学，他只会埋头苦干。其他植物吃的是光，挤出的是氧气。路灯花吃的是黑暗，挤出的却是光。对于他如何能产生光这件事，路灯花持谨慎态度。“我不会说这是‘巫术’，我也不会使用‘原力的黑暗面’，我只是……我想我说得够多的了。” 
 
 [CACTUS_DESCRIPTION_HEADER]
 仙人掌发射的穿刺弹可以用来打击地面和空中目标。
@@ -806,7 +806,7 @@ V币不足阿～亲～
 {KEYWORD}伤害：{STAT}中等
 {KEYWORD}范围：{STAT}五个方向
 {SHORTLINE}
-{FLAVOR}星星果：“嘿，哥们，有一天我去看牙医，他说我有四个牙洞。我一数，我就只有一颗牙齿！一颗牙齿长了四个牙洞？怎么会这样啊？”
+{FLAVOR}星星果：“嘿，哥们，有一天我去看牙医，他说我有四个牙洞。我一数，我就只有一颗牙齿！一颗牙齿长了四个牙洞？怎么会这样啊？” 
 
 [PUMPKIN_DESCRIPTION_HEADER]
 南瓜头，可以用他的外壳保护其他植物。
@@ -877,7 +877,7 @@ V币不足阿～亲～
 {KEYWORD}范围：{STAT}近距离接触
 {KEYWORD}特点：{STAT}改变僵尸的前进路线
 {SHORTLINE}
-{FLAVOR}路线转向，这不仅仅是大蒜的专业，更是他的热情所在。他在布鲁塞尔大学里获得了转向学的博士学位。他能把路线向量和反击阵列，讲上一整天。
+{FLAVOR}路线转向，这不仅仅是大蒜的专业，更是他的热情所在。他在布鲁塞尔大学里获得了转向学的博士学位。他能把路线向量和反击阵列，讲上一整天。 
 他甚至会把家里的东西推到街上去。不知道为啥，他老婆还可以忍受这些。
 
 [UMBRELLA_LEAF_DESCRIPTION_HEADER]
@@ -896,7 +896,7 @@ V币不足阿～亲～
 {SHORTLINE}
 {KEYWORD}特点：{STAT}提供金币和银币
 {SHORTLINE}
-{FLAVOR}金盏花花了许多时间，来考虑是吐出一枚金币，还是吐出一枚银币。她权衡着各个角度，不停地思索着。她做了坚实的研究，并且，时刻注意最新的出版资料。这就是成功者们总是最先进的原因。
+{FLAVOR}金盏花花了许多时间，来考虑是吐出一枚金币，还是吐出一枚银币。她权衡着各个角度，不停地思索着。她做了坚实的研究，并且，时刻注意最新的出版资料。这就是成功者们总是最先进的原因。 
 
 [MELON_PULT_DESCRIPTION_HEADER]
 西瓜投手可以对成群的僵尸造成巨大伤害。
@@ -907,7 +907,7 @@ V币不足阿～亲～
 {KEYWORD}范围：{STAT}抛掷
 {KEYWORD}特点：{STAT}西瓜可以对目标附近的僵尸造成伤害
 {SHORTLINE}
-{FLAVOR}低调从来不是西瓜投手的风格，“太阳——赐予我——力量，我可是草地上最能打的人”，他说“我不是吹牛，瞅瞅那些统计数字，你就明白了。”
+{FLAVOR}低调从来不是西瓜投手的风格，“太阳——赐予我——力量，我可是草地上最能打的人”，他说“我不是吹牛，瞅瞅那些统计数字，你就明白了。”  
 
 [GATLING_PEA_DESCRIPTION_HEADER]
 机枪射手一次可以发射四颗豌豆。
@@ -918,7 +918,7 @@ V币不足阿～亲～
 {KEYWORD}发射速度：{STAT}四倍
 {KEYWORD}必须种植在双发射手上
 {SHORTLINE}
-{FLAVOR}当机枪射手宣布他要参军的时候，他的父母很为他担心，他们异口同声地对他说：“亲爱的，这太危险了。”机枪射手拒绝让步，“生活本就危险，”他这样回答着，此时他的眼睛里，正闪烁着钢铁般的信念。
+{FLAVOR}当机枪射手宣布他要参军的时候，他的父母很为他担心，他们异口同声地对他说：“亲爱的，这太危险了。”机枪射手拒绝让步，“生活本就危险，”他这样回答着，此时他的眼睛里，正闪烁着钢铁般的信念。 
 
 [TWIN_SUNFLOWER_DESCRIPTION_HEADER]
 双胞向日葵的阳光产量是普通向日葵的两倍
@@ -928,7 +928,7 @@ V币不足阿～亲～
 {KEYWORD}阳光产量：{STAT}双倍
 {KEYWORD}必须种植在向日葵上
 {SHORTLINE}
-{FLAVOR}这是一个疯狂的夜晚，禁忌的科学技术，让双胞向日葵来到了这个世界。电闪雷鸣，狂风怒吼，都在表示着这个世界对他的拒绝。但是一切都无济于事，双胞向日葵仍然活着！
+{FLAVOR}这是一个疯狂的夜晚，禁忌的科学技术，让双胞向日葵来到了这个世界。电闪雷鸣，狂风怒吼，都在表示着这个世界对他的拒绝。但是一切都无济于事，双胞向日葵仍然活着！ 
 
 [GLOOM_SHROOM_DESCRIPTION_HEADER]
 多嘴小蘑菇围绕自身释放大量烟雾
@@ -948,7 +948,7 @@ V币不足阿～亲～
 {SHORTLINE}
 {FLAVOR}“嗷！”猫尾草说。
 “嗷！嗷！嗷！这让你困惑么？
-你不会就因为我名字里有猫还有我看着像只猫就期待我喵喵喵的叫？
+你不会就因为我名字里有猫还有我看着像只猫就期待我喵喵喵的叫？ 
 这里可不是这样滴~~
 我可拒绝被随便归类。”
 
@@ -1077,7 +1077,7 @@ V币不足阿～亲～
 {KEYWORD}铁网门强度：{STAT}高{1100}
 {KEYWORD}弱点：{STAT}大喷菇{METAL}和磁力菇
 {SHORTLINE}
-{FLAVOR}铁网门僵尸上次拜访过的房主防守并不专业，在吃掉那房主的脑子后拿走了他家的铁网门。
+{FLAVOR}铁网门僵尸上次拜访过的房主防守并不专业，在吃掉那房主的脑子后拿走了他家的铁网门。 
 
 [FOOTBALL_ZOMBIE_DESCRIPTION_HEADER]
 橄榄球僵尸的表演秀。
@@ -1321,9 +1321,9 @@ V币不足阿～亲～
 你知道这意味着……
 [CRAZY_DAVE_303]
 疯狂戴夫的闪闪亮
-杂货店正式营业了！
+杂货店正式营业了！ 
 [CRAZY_DAVE_304]
-来瞧一瞧！你是否找到了一些你喜欢的东西！
+来瞧一瞧！你是否找到了一些你喜欢的东西！ 
 
 [CRAZY_DAVE_401]
 玩过“打僵尸”
@@ -1346,9 +1346,9 @@ V币不足阿～亲～
 现在他们想试试你的
 后院。
 [CRAZY_DAVE_503]
-但最重要的是，你不能使用你的蘑菇了！
+但最重要的是，你不能使用你的蘑菇了！ 
 [CRAZY_DAVE_504]
-因为他们白天要睡觉！
+因为他们白天要睡觉！ 
 [CRAZY_DAVE_505]
 这难道不是纨绔公子
 的作风吗？
@@ -1609,24 +1609,25 @@ V币不足阿～亲～
 {NO_SOUND}{NO_CLICK}在完整版本的游戏中，你需要闯过更多关卡，会有更多的僵尸来攻打你，但也会有更多植物帮助你！
 
 [CRAZY_DAVE_2035]
-{NO_SOUND}{NO_CLICK}替你更换主界面的
+{NO_SOUND}{NO_CLICK}替你更换排行榜界面的
 房子，价格公道！
 
 [CRAZY_DAVE_2036]
-{NO_SOUND}{NO_CLICK}有了普通房蓝图，你便可以精心装饰自己在
-主界面的郊区梦之家！
+{NO_SOUND}{NO_CLICK}有了普通房蓝图，
+你便可以精心装饰自己在排行榜界面的郊区梦之家！
 
 [CRAZY_DAVE_2037]
 {NO_SOUND}{NO_CLICK} 有了尖叫房蓝图，
-你便可以在主界面吓吓你的邻居！
+你便可以在排行榜界面吓吓你的邻居！
 
 [CRAZY_DAVE_2038]
-{NO_SOUND}{NO_CLICK} 有了未来房蓝图 ，你便可以在主界面向着
-太空之路，一鸣惊人！
+{NO_SOUND}{NO_CLICK} 有了未来房蓝图，
+你便可以在排行榜界面向着太空之路，
+一鸣惊人！
 
 [CRAZY_DAVE_2039]
 {NO_SOUND}{NO_CLICK}房车蓝图也许无法在
-主界面让你的邻居感到惊奇，但至少便宜啊！
+排行榜界面让你的邻居感到惊奇，但至少便宜啊！
 
 [CRAZY_DAVE_2040]
 {NO_SOUND}{NO_CLICK}小丑房！小丑房！
@@ -2111,7 +2112,7 @@ V币不足阿～亲～
 种子需要一段时间的恢复才能再次种植
 
 [ADVICE_CANT_AFFORD_PLANT]
-你需要更多的阳光才能那样做！
+你需要更多的阳光才能那样做！ 
 
 [ADVICE_PLANT_NEEDS_REPEATER]
 请先种下双重射手！
@@ -2123,7 +2124,7 @@ V币不足阿～亲～
 请先种下向日葵！
 
 [ADVICE_PLANT_NEEDS_SPIKEWEED]
-请先种下地刺！
+请先种下地刺！ 
 
 [ADVICE_PLANT_NEEDS_KERNELPULT]
 请先种下一对玉米投手！
@@ -2338,10 +2339,10 @@ V币不足阿～亲～
 恢复中……
 
 [NOT_ENOUGH_SUN]
-没有足够的阳光
+没有足够的阳光 
 
 [REQUIRES_REPEATER]
-需要双重射手
+需要双重射手 
 
 [REQUIRES_MELONPULT]
 需要西瓜投手
@@ -2468,18 +2469,18 @@ V币不足阿～亲～
 你没有选能对付气球僵尸的植物，你确定要继续吗？
 
 [SEED_CHOOSER_SUN_WARNING]
-你没有选能生产阳光的植物，确定要继续吗？
+你没有选能生产阳光的植物，确定要继续吗？ 
 
 [SEED_CHOOSER_NIGHT_SUN_WARNING]
 现在是晚上，你会比白天需要更多的向日葵。
-确定这关不使用向日葵吗？
+确定这关不使用向日葵吗？ 
 
 [SEED_CHOOSER_PUFFSHROOM_WARNING]
 这关如果没有小喷菇将会非常的难。
 你确定这关不使用小喷菇吗？
 
 [SEED_CHOOSER_POOL_WARNING]
-你确定这关不使用任何水生植物吗？
+你确定这关不使用任何水生植物吗？ 
 
 [SEED_CHOOSER_ROOF_WARNING]
 你确定这关不使用花盆吗？
@@ -2618,7 +2619,7 @@ V币不足阿～亲～
 生存模式：屋顶 (困难)
 
 [SURVIVAL_DAY_ENDLESS]
-生存模式：白天 (无尽)
+生存模式：白天 (无尽) 
 
 [SURVIVAL_NIGHT_ENDLESS]
 生存模式：黑夜 (无尽)
@@ -3468,7 +3469,7 @@ MIKE RACIOPPI
 SHAWN CONARD, ED MILLER, ADAM MACDONNELL
 BRIAN FIETE, CHRIS HARGROVE, DAVID PARTON
 DAVID P. WYCLIFF
-JASON KAPALKA, JOHN VECHEY, DAVE HAAS, DAVE ROBERTS, ED BROWN, LINDSEY KURZ,
+JASON KAPALKA, JOHN VECHEY, DAVE HAAS, DAVE ROBERTS, ED BROWN, LINDSEY KURZ, 
 JEFF GATES, MYSTICSAGE, DAVE ROHRL, POPCAP BETA TESTERS
 
 [CREDITS_ROLES2]
@@ -3571,13 +3572,13 @@ NICOLE LEMASTER
 特别感谢
 
 [CREDITS_NAMES_XBLA15]
-DAVE HAAS, SUKHBIR SIDHU, DAN BANAY, JACOB VANWINGEN,
-T. CARL KWOH, NOAH MAAS, DAVE ROBERTS, JASON KAPALKA,
+DAVE HAAS, SUKHBIR SIDHU, DAN BANAY, JACOB VANWINGEN, 
+T. CARL KWOH, NOAH MAAS, DAVE ROBERTS, JASON KAPALKA, 
 JOHN VECHEY, BRIAN FIETE, KIRK SCOTT, HEATHER HAZEN,
 BEN AHRONI, MICHAEL SANTORA, JOE MOBLEY, BEN LYON,
 TYSEN HENDERSON, CHENELLE BREMONT, SANDRA CONGDON,
 GEORGE FAN, TOD SEMPLE, STEPHEN NOTLEY, DAVE ROBERTS,
-GINGER ROBERTS, LAURIE THORNTON, KIRK SCOTT,
+GINGER ROBERTS, LAURIE THORNTON, KIRK SCOTT, 
 HEATHER HAZEN, BEN AHRONI, MICHAEL SANTORA,
 DAVID SHAW, PATRICK MENDENALL, JOHN SMITH, PHIL SPENCER
 

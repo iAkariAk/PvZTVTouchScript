@@ -3460,7 +3460,7 @@ void TestMenuWidget_DrawBackground(ZombatarWidget *zombatarWidget, Sexy::Graphic
 
 void TestMenuWidget_DrawPortrait(ZombatarWidget *zombatarWidget, Sexy::Graphics *graphics,int x,int y) {
     Sexy::Image* backgroundImage = ZombatarWidget_GetBackgroundImageByIndex(zombatarWidget->mSelectedBackground);
-    if (zombatarWidget->mSelectedBackground == 4 && zombatarWidget->mSelectedBackgroundColor != 255) {
+    if (ZombatarWidget_AccessoryIsColorized(ZombatarWidget::BACKGROUND,zombatarWidget->mSelectedBackground) && zombatarWidget->mSelectedBackgroundColor != 255) {
         Sexy_Graphics_DrawImageColorized(graphics, backgroundImage, &gZombatarAccessoryColor2[zombatarWidget->mSelectedBackgroundColor], x, y);
     } else {
         Sexy_Graphics_DrawImage(graphics, backgroundImage, x, y);

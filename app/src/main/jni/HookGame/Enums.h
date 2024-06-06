@@ -3115,7 +3115,8 @@ public:
     int mChallengeRecords[100]; // 11 ~ 110 ， 但末尾6个完全不会用到，可以成为我的自己存数据的空间。
     int mPurchases[36]; // 111 ~ 146 ，本应该是mPurchases[80]，111 ~ 190，但仅用到了前36个。
     bool mAchievements[12]; // 147 ~ 149, 从mPurchases[80]分出来的
-    bool mUnused[147]; // 150 ~
+    bool mUnused[146]; // 150 ~
+    bool mZombatarEnabled;
     unsigned char mZombatarHat;
     unsigned char mZombatarHatColor;
     unsigned char mZombatarHair;
@@ -3470,8 +3471,8 @@ public:
     SeedType::SeedType mLastConveyorSeedType; // 32
     int mSurvivalStage; // 33
     int mSlotMachineRollCount; // 34
-    Reanimation *mReanimChallenge; // 35
-    Reanimation *mReanimCloud[6]; // 36 ~ 41
+    int mReanimChallenge; // 35
+    int mReanimCloud[6]; // 36 ~ 41
     int mCloudCounter[6]; // 42 ~ 47
     int mChallengeGridX; // 48
     int mChallengeGridY; // 49
@@ -3489,9 +3490,9 @@ public:
     int mHeavyWeaponSnowPeaCounter; // 74
     int mHeavyWeaponTorchWoodCounter; // 75
     int unkHeavyWeaponWithInitValue10; // 76
-    Reanimation *mReanimHeavyWeapon1; // 77
-    Reanimation *mReanimHeavyWeapon2; // 78
-    Reanimation *mReanimHeavyWeapon3; // 79
+    int mReanimHeavyWeaponID1; // 77
+    int mReanimHeavyWeaponID2; // 78
+    int mReanimHeavyWeaponID3; // 79
 }; // 大小80个整数
 
 struct ReanimatorTrack {

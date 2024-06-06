@@ -1,18 +1,16 @@
 package com.transmension.mobile;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Rect;
-import android.media.MediaCodec;
-import android.media.MediaCodecInfo;
-import android.media.MediaFormat;
 import android.media.MediaRecorder;
-import android.os.Build;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
+import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -23,9 +21,6 @@ import android.view.ViewTreeObserver;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.widget.EditText;
-
-import java.io.File;
-import java.io.IOException;
 
 /* loaded from: classes.dex */
 public class NativeView extends SurfaceView implements SurfaceHolder.Callback2, ViewTreeObserver.OnGlobalLayoutListener {
@@ -41,6 +36,7 @@ public class NativeView extends SurfaceView implements SurfaceHolder.Callback2, 
     private EditText mTextInput;
     private AlertDialog mTextInputDialog;
     private TextInputManager mTextInputManager;
+
     private final boolean shiLiuBiJiu;
     private final int widthAs, heightAs;
 
@@ -48,7 +44,7 @@ public class NativeView extends SurfaceView implements SurfaceHolder.Callback2, 
 
     protected native void onKeyboardFrameNative(long j, int i);
 
-    protected native static void onSurfaceChangedNative(long j, Surface surface, int i, int i2, int i3);
+    protected native void onSurfaceChangedNative(long j, Surface surface, int i, int i2, int i3);
 
     protected native void onSurfaceCreatedNative(long j, Surface surface);
 
@@ -64,8 +60,8 @@ public class NativeView extends SurfaceView implements SurfaceHolder.Callback2, 
 
     public NativeView(Context context) {
         super(context);
-        mLocation = new int[2];
-        mDispatchingUnhandledKeyEvent = false;
+        this.mLocation = new int[2];
+        this.mDispatchingUnhandledKeyEvent = false;
         getViewTreeObserver().addOnGlobalLayoutListener(this);
         setText("");
         getHolder().addCallback(this);
@@ -78,8 +74,8 @@ public class NativeView extends SurfaceView implements SurfaceHolder.Callback2, 
 
     public NativeView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mLocation = new int[2];
-        mDispatchingUnhandledKeyEvent = false;
+        this.mLocation = new int[2];
+        this.mDispatchingUnhandledKeyEvent = false;
         getViewTreeObserver().addOnGlobalLayoutListener(this);
         setText("");
         getHolder().addCallback(this);
@@ -90,11 +86,11 @@ public class NativeView extends SurfaceView implements SurfaceHolder.Callback2, 
         heightAs = context.getSharedPreferences("data", 0).getInt("height", 9);
     }
 
-    /* JADX INFO: Access modifiers changed from: package-private */
-    public void setActivity(NativeActivity activity) {
-        mActivity = activity;
-        mTextInputManager = activity.createTextInputManager(this);
-        mTextInputManager.setListener(new TextInputManager.Listener() {
+    void setActivity(NativeActivity activity) {
+        this.mActivity = activity;
+        this.mTextInputManager = activity.createTextInputManager(this);
+        this.mTextInputManager.setListener(new TextInputManager.Listener() { // from class: com.transmension.mobile.NativeView.1
+            @Override // com.transmension.mobile.TextInputManager.Listener
             public void onTextChanged(View view, String text, int start, int end, long cookie) {
                 if (isAlive()) {
                     onTextChangedNative(getNativeHandle(), text, start, end, cookie);
@@ -113,6 +109,17 @@ public class NativeView extends SurfaceView implements SurfaceHolder.Callback2, 
                 }
             }
         });
+    }
+
+    boolean isAlive() {
+        return this.mActivity != null && this.mActivity.isAlive();
+    }
+
+    @Override // android.view.SurfaceHolder.Callback
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        if (isAlive()) {
+            onSurfaceChangedNative(getNativeHandle(), holder.getSurface(), format, width, height);
+        }
     }
 
     @Override
@@ -143,58 +150,10 @@ public class NativeView extends SurfaceView implements SurfaceHolder.Callback2, 
         return 0;
     }
 
-    boolean isAlive() {
-        return mActivity != null && mActivity.isAlive();
-    }
-
-//    private static final int VIDEO_WIDTH = 1280;
-//    private static final int VIDEO_HEIGHT = 720;
-//    private static final int SCREEN_FRAME_RATE = 60;
-//    private static final int SCREEN_FRAME_INTERVAL = 1;
-//    MediaRecorder mMediaRecorder;
-//
-//    private void initRecord() {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            try {
-//                if (mMediaRecorder == null) {
-//                    mMediaRecorder = new MediaRecorder();
-//                }
-//
-//                //mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);//音频源  麦克风
-//                // 设置录制视频源为Camera(相机)
-//
-//                mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);//视频源
-//                mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);//视频输出格式
-//                mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);//视频录制格式
-//
-//                mMediaRecorder.setVideoSize(1280, 720);
-//                // 设置录制的视频帧率。必须放在设置编码和格式的后面，否则报错，这样设置变清晰
-//                mMediaRecorder.setVideoEncodingBitRate(10 * 1024 * 1024);
-//
-//                mMediaRecorder.setOutputFile(new File(mActivity.getExternalDataPath(), "new.mp4").getAbsolutePath());
-//
-//                mMediaRecorder.prepare();
-//                mMediaRecorder.start();
-//                onSurfaceCreatedNative(getNativeHandle(), mMediaRecorder.getSurface());
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//            mMediaRecorder.stop();
-//        }
-//    }
-
-    @Override // android.view.SurfaceHolder.Callback
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        if (isAlive()) {
-            onSurfaceChangedNative(getNativeHandle(), holder.getSurface(), format, width, height);
-        }
-    }
-
-
     @Override // android.view.SurfaceHolder.Callback
     public void surfaceCreated(SurfaceHolder holder) {
         Log.i(TAG, "surfaceCreated()");
-        mCurSurfaceHolder = holder;
+        this.mCurSurfaceHolder = holder;
         if (isAlive()) {
             onSurfaceCreatedNative(getNativeHandle(), holder.getSurface());
         }
@@ -203,7 +162,7 @@ public class NativeView extends SurfaceView implements SurfaceHolder.Callback2, 
     @Override // android.view.SurfaceHolder.Callback
     public void surfaceDestroyed(SurfaceHolder holder) {
         Log.i(TAG, "surfaceDestroyed()");
-        mCurSurfaceHolder = holder;
+        this.mCurSurfaceHolder = holder;
         if (isAlive()) {
             onSurfaceDestroyedNative(getNativeHandle());
         }
@@ -211,16 +170,16 @@ public class NativeView extends SurfaceView implements SurfaceHolder.Callback2, 
 
     @Override // android.view.ViewTreeObserver.OnGlobalLayoutListener
     public void onGlobalLayout() {
-        getLocationInWindow(mLocation);
+        getLocationInWindow(this.mLocation);
         int w = getWidth();
         int h = getHeight();
-        if (mLocation[0] != mLastContentX || mLocation[1] != mLastContentY || w != mLastContentWidth || h != mLastContentHeight) {
-            mLastContentX = mLocation[0];
-            mLastContentY = mLocation[1];
-            mLastContentWidth = w;
-            mLastContentHeight = h;
+        if (this.mLocation[0] != this.mLastContentX || this.mLocation[1] != this.mLastContentY || w != this.mLastContentWidth || h != this.mLastContentHeight) {
+            this.mLastContentX = this.mLocation[0];
+            this.mLastContentY = this.mLocation[1];
+            this.mLastContentWidth = w;
+            this.mLastContentHeight = h;
         }
-        Log.i(TAG, String.format("Content rect: [%d %d, %d %d]", mLastContentX, mLastContentY, mLastContentWidth, mLastContentHeight));
+        Log.i(TAG, String.format("Content rect: [%d %d, %d %d]", this.mLastContentX, this.mLastContentY, this.mLastContentWidth, this.mLastContentHeight));
         Rect r = new Rect();
         getWindowVisibleDisplayFrame(r);
         int screenHeight = getRootView().getHeight();
@@ -233,13 +192,14 @@ public class NativeView extends SurfaceView implements SurfaceHolder.Callback2, 
 
     @Override // android.view.SurfaceHolder.Callback2
     public void surfaceRedrawNeeded(SurfaceHolder holder) {
-        mCurSurfaceHolder = holder;
+        this.mCurSurfaceHolder = holder;
     }
 
     @Override // android.view.View
+    @SuppressLint({"ClickableViewAccessibility"})
     public boolean onTouchEvent(MotionEvent event) {
         if (isAlive()) {
-            mActivity.onNativeMotionEvent(event);
+            this.mActivity.onNativeMotionEvent(event);
             return true;
         }
         return true;
@@ -248,30 +208,41 @@ public class NativeView extends SurfaceView implements SurfaceHolder.Callback2, 
     @Override // android.view.View
     public boolean onGenericMotionEvent(MotionEvent event) {
         if (isAlive()) {
-            mActivity.onNativeMotionEvent(event);
+            this.mActivity.onNativeMotionEvent(event);
             return true;
         }
         return true;
     }
 
+
+    //LB键和RB键，用于主界面翻页。长按左键或右键时触发一次。
+//    private final KeyEvent lbEventDown = new KeyEvent(0, 0, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BUTTON_L1, 0, 0, 0, 0, 0, InputDevice.SOURCE_CLASS_BUTTON);
+//    private final KeyEvent rbEventDown = new KeyEvent(0, 0, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BUTTON_R1, 0, 0, 0, 0, 0, InputDevice.SOURCE_CLASS_BUTTON);
+
     @Override // android.view.View, android.view.KeyEvent.Callback
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mDispatchingUnhandledKeyEvent || (event.isSystem() && keyCode != 4 && keyCode != KeyEvent.KEYCODE_MENU)) {
+        if (this.mDispatchingUnhandledKeyEvent || (event.isSystem() && keyCode != 4 && keyCode != 82)) {
             return false;
         }
         mActivity.onNativeKeyEvent(event);
+//        if (event.getRepeatCount() == 1) {
+//            if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
+//                mActivity.dispatchKeyEvent(lbEventDown);
+//            } else if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+//                mActivity.dispatchKeyEvent(rbEventDown);
+//            }
+//        }
         return true;
     }
 
     @Override // android.view.View, android.view.KeyEvent.Callback
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-
-        if (mDispatchingUnhandledKeyEvent || (event.isSystem() && keyCode != 4 && keyCode != KeyEvent.KEYCODE_MENU)) {
+        if (this.mDispatchingUnhandledKeyEvent || (event.isSystem() && keyCode != 4 && keyCode != 82)) {
             return false;
         }
-        if (isAlive()) {
-            mActivity.onNativeKeyEvent(event);
-        }
+
+        mActivity.onNativeKeyEvent(event);
+
         return true;
     }
 
@@ -292,154 +263,155 @@ public class NativeView extends SurfaceView implements SurfaceHolder.Callback2, 
 
     public void dispatchUnhandledKeyEvent(KeyEvent event) {
         try {
-            mDispatchingUnhandledKeyEvent = true;
+            this.mDispatchingUnhandledKeyEvent = true;
             super.dispatchKeyEvent(event);
         } finally {
-            mDispatchingUnhandledKeyEvent = false;
+            this.mDispatchingUnhandledKeyEvent = false;
         }
     }
 
     public void setInputCookie(long cookie) {
         Log.i(TAG, String.format("setInputCookie: 0x%x", cookie));
-        if (mTextInputManager != null) {
-            mTextInputManager.setInputCookie(cookie);
+        if (this.mTextInputManager != null) {
+            this.mTextInputManager.setInputCookie(cookie);
         }
     }
 
     public long getInputCookie() {
-        if (mTextInputManager != null) {
-            return mTextInputManager.getInputCookie();
+        if (this.mTextInputManager != null) {
+            return this.mTextInputManager.getInputCookie();
         }
         return 0L;
     }
 
     public void setInputType(int type) {
         Log.i(TAG, String.format("setInputType: 0x%x", type));
-        if (mTextInputManager != null) {
-            mTextInputManager.setInputType(type);
+        if (this.mTextInputManager != null) {
+            this.mTextInputManager.setInputType(type);
         }
     }
 
     public int getInputType() {
-        if (mTextInputManager != null) {
-            return mTextInputManager.getInputType();
+        if (this.mTextInputManager != null) {
+            return this.mTextInputManager.getInputType();
         }
         return 0;
     }
 
     public void setImeOptions(int options) {
         Log.i(TAG, String.format("setImeOptions: 0x%x", options));
-        if (mTextInputManager != null) {
-            mTextInputManager.setImeOptions(options);
+        if (this.mTextInputManager != null) {
+            this.mTextInputManager.setImeOptions(options);
         }
     }
 
     public int getImeOptions() {
-        if (mTextInputManager != null) {
-            return mTextInputManager.getImeOptions();
+        if (this.mTextInputManager != null) {
+            return this.mTextInputManager.getImeOptions();
         }
         return 0;
     }
 
     public void setText(String text) {
         Log.i(TAG, "setText: " + text);
-        if (mTextInputManager != null) {
-            mTextInputManager.setText(text);
+        if (this.mTextInputManager != null) {
+            this.mTextInputManager.setText(text);
         }
     }
 
     public void setText(String text, int selectionStart, int selectionEnd) {
         Log.i(TAG, "setText: " + text + " " + selectionStart + ":" + selectionEnd);
-        if (mTextInputManager != null) {
-            mTextInputManager.setText(text, selectionStart, selectionEnd);
+        if (this.mTextInputManager != null) {
+            this.mTextInputManager.setText(text, selectionStart, selectionEnd);
         }
     }
 
     public CharSequence getText() {
-        return mTextInputManager != null ? mTextInputManager.getText() : "";
+        return this.mTextInputManager != null ? this.mTextInputManager.getText() : "";
     }
 
     public void setSelection(int start, int end) {
         Log.i(TAG, "setSelection: " + start + ":" + end);
-        if (mTextInputManager != null) {
-            mTextInputManager.setSelection(start, end);
+        if (this.mTextInputManager != null) {
+            this.mTextInputManager.setSelection(start, end);
         }
     }
 
     public int getSelectionStart() {
-        if (mTextInputManager != null) {
-            return mTextInputManager.getSelectionStart();
+        if (this.mTextInputManager != null) {
+            return this.mTextInputManager.getSelectionStart();
         }
         return 0;
     }
 
     public int getSelectionEnd() {
-        if (mTextInputManager != null) {
-            return mTextInputManager.getSelectionEnd();
+        if (this.mTextInputManager != null) {
+            return this.mTextInputManager.getSelectionEnd();
         }
         return 0;
     }
 
     public void onEditorAction(int actionCode) {
         long eventTime = SystemClock.uptimeMillis();
-        mActivity.dispatchKeyEvent(new KeyEvent(eventTime, eventTime, 0, 66, 0, 0, 0, 0, 22));
-        mActivity.dispatchKeyEvent(new KeyEvent(eventTime, eventTime, 1, 66, 0, 0, 0, 0, 22));
+        this.mActivity.dispatchKeyEvent(new KeyEvent(eventTime, eventTime, 0, 66, 0, 0, 0, 0, 22));
+        this.mActivity.dispatchKeyEvent(new KeyEvent(eventTime, eventTime, 1, 66, 0, 0, 0, 0, 22));
     }
 
     @Override // android.view.View
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         Log.i(TAG, "onCreateInputConnection()");
         InputConnection ic = null;
-        if (mTextInputManager != null) {
-            ic = mTextInputManager.onCreateInputConnection(outAttrs);
+        if (this.mTextInputManager != null) {
+            ic = this.mTextInputManager.onCreateInputConnection(outAttrs);
         }
         if (ic == null) {
-            return super.onCreateInputConnection(outAttrs);
+            InputConnection ic2 = super.onCreateInputConnection(outAttrs);
+            return ic2;
         }
         return ic;
     }
 
     public void showIme(int mode) {
         Log.i(TAG, "showIme()");
-        if (mTextInputManager != null) {
-            mTextInputManager.showIme(mode);
+        if (this.mTextInputManager != null) {
+            this.mTextInputManager.showIme(mode);
         }
     }
 
     public void hideIme(int mode) {
         Log.i(TAG, "hideIme()");
-        if (mTextInputManager != null) {
-            mTextInputManager.hideIme(mode);
+        if (this.mTextInputManager != null) {
+            this.mTextInputManager.hideIme(mode);
         }
     }
 
     public void showTextInputDialog(int mode, String title, String hint, String initial) {
         Log.i(TAG, "showTextInputDialog()");
-        if (mTextInputManager != null) {
-            mTextInputManager.showTextInputDialog(mode, title, hint, initial);
+        if (this.mTextInputManager != null) {
+            this.mTextInputManager.showTextInputDialog(mode, title, hint, initial);
         }
     }
 
     public void hideTextInputDialog() {
         Log.i(TAG, "hideTextInputDialog()");
-        if (mTextInputManager != null) {
-            mTextInputManager.hideTextInputDialog();
+        if (this.mTextInputManager != null) {
+            this.mTextInputManager.hideTextInputDialog();
         }
     }
 
     public void hideTextInputDialog(boolean cancel) {
         Log.i(TAG, "hideTextInputDialog()");
-        if (mTextInputManager != null) {
-            mTextInputManager.hideTextInputDialog(cancel);
+        if (this.mTextInputManager != null) {
+            this.mTextInputManager.hideTextInputDialog(cancel);
         }
     }
 
     public long getNativeHandle() {
-        return mActivity.mNativeHandle;
+        return this.mActivity.mNativeHandle;
     }
 
     public float getDensity() {
-        Display display = mActivity.getWindowManager().getDefaultDisplay();
+        Display display = this.mActivity.getWindowManager().getDefaultDisplay();
         DisplayMetrics metrics = new DisplayMetrics();
         display.getMetrics(metrics);
         Log.i(TAG, "density :" + metrics.density);

@@ -17,6 +17,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -28,10 +29,7 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.util.Set;
-
 
 public class NativeActivity extends Activity {
     public static int ACTION_OPEN = 0;
@@ -46,25 +44,19 @@ public class NativeActivity extends Activity {
     public static final int MBT_OK_CANCEL = 2;
     public static final int MBT_YES = 3;
     public static final int MBT_YES_NO = 5;
-    public static final String META_DATA_FUNC_NAME = "android.app.func_name";
-    public static final String META_DATA_JNI_LIB_NAME = "android.app.jni.lib_name";
-    public static final String META_DATA_LIBS = "android.app.libs";
-    public static final String META_DATA_LIB_NAME = "android.app.lib_name";
     private static final String TAG = "NativeActivity";
     private boolean mDestroyed;
     public long mNativeHandle;
     protected NativeView mNativeView;
+
     private View mStartupView;
     protected FrameLayout mLayout = null;
     protected FrameLayout container = null;
-    private final Handler mHandler = new Handler();
+
     private long mStartupTime = System.nanoTime();
     private long mStartupMinDuration = 4000;
     private long mStartupMaxDuration = 15000;
-
-    protected boolean onCreated(Bundle savedInstanceState) {
-        return true;
-    }
+    private final Handler mHandler = new Handler();
 
 
     void setUI(){
@@ -104,9 +96,9 @@ public class NativeActivity extends Activity {
             }
         }
     }
+    @Override // android.app.Activity
+    protected void onCreate(Bundle savedInstanceState) {
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
 
         setUI();
 
@@ -116,7 +108,6 @@ public class NativeActivity extends Activity {
         mNativeView.setActivity(this);
         mNativeView.requestFocus();
         mLayout.addView(mNativeView, lp);
-        super.onCreate(savedInstanceState);
         FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
         layoutParams.gravity = Gravity.CENTER;
         mLayout.setLayoutParams(layoutParams);
@@ -126,20 +117,16 @@ public class NativeActivity extends Activity {
         container.addView(mLayout);
         setContentView(container);
 
-
         final String libPath = getApplicationInfo().nativeLibraryDir;
-        String sysLibPath = "/system/lib/" + getPackageName();
-        String vendorLibPath = "/vendor/lib/" + getPackageName();
-        String dataFilesPath = getInternalDataPath();
-        String[] libPaths = {libPath, sysLibPath, vendorLibPath, dataFilesPath};
-
+        final String sysLibPath = "/system/lib/" + getPackageName();
+        final String vendorLibPath = "/vendor/lib/" + getPackageName();
+        final String dataFilesPath = getInternalDataPath();
+        final String[] libPaths = {libPath, sysLibPath, vendorLibPath, dataFilesPath};
 
         final String[] depends = new String[]{"fmodex"};
         final String module = "GameMain";
         final String libname = "main";
         final String funcname = "android_main";
-        final String jniLibname = "native_code";
-
 
         String path = null;
         int length = libPaths.length;
@@ -175,13 +162,15 @@ public class NativeActivity extends Activity {
         if (path == null) {
             throw new IllegalArgumentException("Unable to find native library: " + libname + " or " + module);
         }
+        NativeApp.load(libPaths, depends);
 
-        NativeApp.load(jniLibname, libPaths, depends);
         mNativeHandle = NativeApp.loadNativeApp(path, funcname, this, mNativeView, getUserDataPath(), getExternalDataPath(), Build.VERSION.SDK_INT, getAssets());
         if (mNativeHandle == 0) {
             throw new IllegalArgumentException("Unable to load native library: " + path);
         }
+        super.onCreate(savedInstanceState);
         mNativeView.requestFocus();
+
 
     }
 
@@ -195,86 +184,101 @@ public class NativeActivity extends Activity {
     }
 
     @Override // android.app.Activity
-    public void onDestroy() {
+    protected void onDestroy() {
+        Log.i(TAG, "onDestroy()");
         mDestroyed = true;
-        if (mNativeHandle != 0)
-            NativeApp.unloadNativeApp(mNativeHandle);
-        mNativeHandle = 0L;
+        NativeApp.unloadNativeApp(mNativeHandle);
         super.onDestroy();
     }
 
     @Override // android.app.Activity
-    public void onPause() {
+    protected void onPause() {
+        Log.i(TAG, "onPause()");
         super.onPause();
         NativeApp.onPauseNative(mNativeHandle);
 
     }
 
     @Override // android.app.Activity
-    public void onResume() {
+    protected void onResume() {
+        Log.i(TAG, "onResume()");
         super.onResume();
         NativeApp.onResumeNative(mNativeHandle);
     }
 
+
     @Override // android.app.Activity
-    public void onStart() {
+    protected void onStart() {
+        Log.i(TAG, "onStart()");
         super.onStart();
         NativeApp.onStartNative(mNativeHandle);
+
     }
 
     @Override // android.app.Activity
-    public void onStop() {
+    protected void onStop() {
+        Log.i(TAG, "onStop()");
         super.onStop();
         NativeApp.onStopNative(mNativeHandle);
+
     }
 
     @Override // android.app.Activity, android.content.ComponentCallbacks
     public void onConfigurationChanged(Configuration newConfig) {
+        Log.i(TAG, "onConfigurationchanged()");
         super.onConfigurationChanged(newConfig);
-        if (!mDestroyed) NativeApp.onConfigurationChangedNative(mNativeHandle);
+        if (!mDestroyed) {
+            NativeApp.onConfigurationChangedNative(mNativeHandle);
+        }
     }
 
     @Override // android.app.Activity, android.content.ComponentCallbacks
     public void onLowMemory() {
+        Log.i(TAG, "onLowMemory()");
         super.onLowMemory();
-        if (!mDestroyed) NativeApp.onLowMemoryNative(mNativeHandle);
+        if (!mDestroyed) {
+            NativeApp.onLowMemoryNative(mNativeHandle);
+        }
     }
-
 
     public void createEventListeners() {
     }
-//
+
 //    public void addEventListener(ActivityEventListener listener) {
+//
 //    }
 //
 //    public void removeEventListener(ActivityEventListener listener) {
+//
 //    }
 
     protected void dispatchOnCreateEventToListener() {
+
+
     }
 
     protected void dispatchOnStartEventToListener() {
+
     }
 
     protected void dispatchOnPauseEventToListener() {
+
     }
 
     protected void dispatchOnResumeEventToListener() {
+
     }
 
     protected void dispatchOnStopEventToListener() {
+
     }
 
     protected void dispatchOnDestroyEventToListener() {
-    }
 
+    }
 
     public boolean isAlive() {
         return !mDestroyed;
-    }
-
-    public long getNativeHandle() {
-        return mNativeHandle;
     }
 
     public FrameLayout getLayout() {
@@ -302,7 +306,7 @@ public class NativeActivity extends Activity {
     }
 
     public void showStartupView() {
-        if (mStartupView != null && mLayout != null && mStartupView.getParent() == null) {
+        if (mStartupView != null && mStartupView.getParent() == null) {
             FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(-1, -1);
             mLayout.addView(mStartupView, lp);
             mStartupTime = System.nanoTime();
@@ -322,13 +326,13 @@ public class NativeActivity extends Activity {
             if (elapsed < mStartupMinDuration) {
                 delay = mStartupMinDuration - elapsed;
             }
+
             mHandler.postDelayed(() -> {
                 hideStartupView();
                 setStartupView(null);
             }, delay);
         }
     }
-
 
     public void installPackage(String path) {
     }
@@ -339,7 +343,8 @@ public class NativeActivity extends Activity {
     }
 
     public String getExternalDataPath() {
-        return getExternalFilesDir(null).getAbsolutePath();
+        File file = getExternalFilesDir(null);
+        return file == null ? "" : file.getAbsolutePath();
     }
 
     protected NativeView createNativeView() {
@@ -351,20 +356,8 @@ public class NativeActivity extends Activity {
     }
 
     public String getPackageSource() {
-        return getApplicationInfo().sourceDir;
-    }
-
-    public String getApplicationName() {
-        return getString(getApplicationInfo().labelRes);
-    }
-
-    public String getActivityName() {
-        try {
-            ActivityInfo info = getPackageManager().getActivityInfo(getComponentName(), 0);
-            return getString(info.labelRes);
-        } catch (PackageManager.NameNotFoundException e) {
-            return "";
-        }
+        ApplicationInfo appInfo = getApplicationInfo();
+        return appInfo.sourceDir;
     }
 
     public String getVersionName() {
@@ -386,7 +379,8 @@ public class NativeActivity extends Activity {
     }
 
     public String getNativeLibraryDir() {
-        return getApplicationInfo().nativeLibraryDir;
+        ApplicationInfo appInfo = getApplicationInfo();
+        return appInfo.nativeLibraryDir;
     }
 
 
@@ -403,6 +397,7 @@ public class NativeActivity extends Activity {
         @Override // android.content.DialogInterface.OnClickListener
         public void onClick(DialogInterface dialog, int which) {
             NativeApp.onMessageBoxButtonClickedNative(mNativeHandle, mMessageBoxId, mId);
+            closeMessageBox(mMessageBoxId);
         }
     }
 
@@ -410,10 +405,8 @@ public class NativeActivity extends Activity {
         return 1048576;
     }
 
-
     public void closeMessageBox(int handle) {
     }
-
 
     public void closeAllMessageBoxes() {
     }
@@ -431,12 +424,11 @@ public class NativeActivity extends Activity {
     }
 
     public String getAndroidId() {
-        return "ABC";
+        return "";
     }
 
-    public String getDeviceId() {
-        return "";
-
+    public int getDeviceId() {
+        return 0;
     }
 
     public String getSerialNumber() {
@@ -444,16 +436,18 @@ public class NativeActivity extends Activity {
     }
 
     public String getMacAddress() {
-        return "ABC";
 
+        return "ABC";
     }
 
     public boolean isOnline() {
-        return true;
+        return false;
     }
 
     public int getActiveNetworkType() {
+
         return 1;
+
     }
 
     public void processWorks() {
@@ -471,6 +465,7 @@ public class NativeActivity extends Activity {
     }
 
     void openURL(String url, int flags) {
+
     }
 
     void openURL(String url) {
@@ -495,6 +490,10 @@ public class NativeActivity extends Activity {
         return mNativeView;
     }
 
+    public long getNativeHandle() {
+        return mNativeHandle;
+    }
+
     public String[] bundleToStringPairs(Bundle bundle) {
         if (bundle == null || bundle.size() == 0) {
             return null;
@@ -506,9 +505,9 @@ public class NativeActivity extends Activity {
             Object value = bundle.get(key);
             String strValue = value.toString();
             int i2 = i + 1;
-            result[i] = key;
+            result[i] = new String(key);
             i = i2 + 1;
-            result[i2] = strValue;
+            result[i2] = new String(strValue);
         }
         return result;
     }
@@ -620,19 +619,22 @@ public class NativeActivity extends Activity {
         }
     }
 
-
 //    public void addActivityResultListener(ActivityResultListener listener) {
+//
 //    }
 //
 //    public void removeActivityResultListener(ActivityResultListener listener) {
+//
 //    }
 //
+//
 //    public void addActivityNewIntentListener(ActivityNewIntentListener listener) {
+//
 //    }
 //
 //    public void removeActivityNewIntentListener(ActivityNewIntentListener listener) {
+//
 //    }
-
 
     @Override // android.app.Activity
     public void onNewIntent(Intent intent) {
@@ -645,10 +647,13 @@ public class NativeActivity extends Activity {
     }
 
     public boolean startWebBrowser(String url, int options, String orientation, String extras) {
+
         return false;
+
     }
 
     public void hideWebBrowser() {
+
     }
 
     void launchApp() {
@@ -658,10 +663,13 @@ public class NativeActivity extends Activity {
         finish();
     }
 
+
     public void setClipboard(String label, String text) {
     }
 
+
     public String getClipboard() {
         return "";
+
     }
 }

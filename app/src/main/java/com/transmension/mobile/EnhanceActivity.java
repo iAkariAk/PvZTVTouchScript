@@ -28,7 +28,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.android.support.CkHomuraMenu;
-import com.trans.pvz.R;
+import com.trans.pvztv.R;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

@@ -54,7 +54,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.trans.pvz.R;
+import com.trans.pvztv.R;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -712,14 +712,14 @@ public class SetActivity extends Activity {
         canShop.setChecked(sharedPreferences.getBoolean("disableShop", false));
         canShop.setOnCheckedChangeListener((compoundButton, bool) -> sharedPreferences.edit().putBoolean("disableShop", bool).apply());
         canShop.setLayoutParams(matchWrapParams);
-        canShop.setOnLongClickListener(v -> {
-            new AlertDialog.Builder(SetActivity.this)
-                    .setTitle(R.string.addon_ingame_canshop)
-                    .setMessage(R.string.addon_ingame_canshop_info)
-                    .setPositiveButton("OK", null)
-                    .create().show();
-            return true;
-        });
+canShop.setOnLongClickListener(v -> {
+    new AlertDialog.Builder(SetActivity.this)
+            .setTitle(R.string.addon_ingame_canshop)
+            .setMessage(R.string.addon_ingame_canshop_info)
+            .setPositiveButton("OK", null)
+            .create().show();
+    return true;
+});
 
         final CheckBox showCoolDown = new CheckBox(this);
         showCoolDown.setText(R.string.addon_ingame_showcooldown);
@@ -740,7 +740,7 @@ public class SetActivity extends Activity {
         disableTrashBin.setChecked(sharedPreferences.getBoolean("disableTrashBin", false));
         disableTrashBin.setOnCheckedChangeListener((compoundButton, bool) -> sharedPreferences.edit().putBoolean("disableTrashBin", bool).apply());
         disableTrashBin.setLayoutParams(matchWrapParams);
-        disableTrashBin.setOnLongClickListener(v -> {
+disableTrashBin.setOnLongClickListener(v -> {
             new AlertDialog.Builder(SetActivity.this)
                     .setTitle(R.string.addon_ingame_disabletrashbin)
                     .setMessage(R.string.addon_ingame_disabletrashbin_info)
@@ -754,14 +754,14 @@ public class SetActivity extends Activity {
         heavyWeapon.setChecked(sharedPreferences.getBoolean("heavyWeaponAccel", false));
         heavyWeapon.setOnCheckedChangeListener((compoundButton, bool) -> sharedPreferences.edit().putBoolean("heavyWeaponAccel", bool).apply());
         heavyWeapon.setLayoutParams(matchWrapParams);
-        heavyWeapon.setOnLongClickListener(v -> {
-            new AlertDialog.Builder(SetActivity.this)
-                    .setTitle(R.string.addon_ingame_heavyweaponaccl)
-                    .setMessage(R.string.addon_ingame_heavyweaponaccl_info)
-                    .setPositiveButton("OK", null)
-                    .create().show();
-            return true;
-        });
+heavyWeapon.setOnLongClickListener(v -> {
+    new AlertDialog.Builder(SetActivity.this)
+            .setTitle(R.string.addon_ingame_heavyweaponaccl)
+            .setMessage(R.string.addon_ingame_heavyweaponaccl_info)
+            .setPositiveButton("OK", null)
+            .create().show();
+    return true;
+});
 
 
         final CheckBox newShovel = new CheckBox(this);
