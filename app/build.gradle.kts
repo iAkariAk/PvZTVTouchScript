@@ -71,8 +71,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     externalNativeBuild {
-        ndkBuild {
-            path = file("src/main/jni/Android.mk")
+        cmake {
+            path = file("src/main/jni/CMakeLists.txt")
         }
     }
     buildFeatures {

@@ -5,7 +5,6 @@
 //
 
 #include "MemoryPatch.h"
-#include "Includes/Logger.h"
 
 MemoryPatch::MemoryPatch() {
     _address = 0;

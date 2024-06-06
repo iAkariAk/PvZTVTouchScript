@@ -9,8 +9,8 @@
 #include <fstream>
 #include <iostream>
 #include <dlfcn.h>
-#include "Includes/Utils.h"
-#include "KittyMemory/MemoryPatch.h"
+#include "Utils.h"
+#include "MemoryPatch.h"
 
 //Target lib here
 #define targetLibName "libGameMain.so"

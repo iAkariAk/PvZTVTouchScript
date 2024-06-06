@@ -50,8 +50,8 @@
 #include "HookGame/Graphics/Graphics.cpp"
 #include "HookGame/Music/Music.cpp"
 #include "HookGame/OpenSL/OpenSL.cpp"
-#include <Substrate/SubstrateHook.h>
-#include <Substrate/CydiaSubstrate.h>
+#include <SubstrateHook.h>
+#include <CydiaSubstrate.h>
 #include <bits/sysconf.h>
 #include <asm-generic/mman-common.h>
 #include <sys/mman.h>

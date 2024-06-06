@@ -5,8 +5,8 @@
 #ifndef PVZ_TV_1_1_5_SPECIALCONSTRAINTS_H
 #define PVZ_TV_1_1_5_SPECIALCONSTRAINTS_H
 
-#include "KittyMemory/MemoryPatch.h"
-#include "Includes/Utils.h"
+#include "MemoryPatch.h"
+#include "Utils.h"
 
 #define SexyAppBaseSize  552
 #define SexyAppBasePartSize  526
