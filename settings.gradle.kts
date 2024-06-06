@@ -13,4 +13,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "PvZ-TV-1.1.1"
-include ':app'
+include(":app")
