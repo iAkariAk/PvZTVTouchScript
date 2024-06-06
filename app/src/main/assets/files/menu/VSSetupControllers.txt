@@ -1,0 +1,26 @@
+DefineWidgetIds ( CONNECT_CONTROLLER );
+
+Enum (
+	WIDGET_ANIMATION_IDLE,
+	WIDGET_ANIMATION_ENTER,
+	WIDGET_ANIMATION_EXIT
+	);
+
+Define EASE_IN_OUT_ANIMATOR 4;
+Define SIN_WAVE_ANIMATOR 12;
+
+#SetBackground 'IMAGE_DECKCHOOSER_BACKGROUND';
+
+AddWidget LabelWidget CONNECT_CONTROLLER;
+SetFont 'FONT_BRIANNETOD16';
+SetLabel 'Connect a second controller and press <A>.';
+SetAlign 1;
+Resize 400 200 400 64;
+
+
+AddWidget HelpBarWidget HELP_BAR;
+AddHelpButton A 'Select';
+#AddHelpButton B 'Back';
+AddAnimator WIDGET_ANIMATION_ENTER TodCurveWidgetAnimator ( 5, (0,1000), (0,600), 100 ) 0;
+AddAnimator WIDGET_ANIMATION_IDLE TodCurveWidgetAnimator ( 11, (0,600), (0,590), 35 ) 0;
+AddAnimator WIDGET_ANIMATION_EXIT TodCurveWidgetAnimator ( EASE_IN_OUT_ANIMATOR, (0,600), (0,1000), 100 ) 5;

@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <!--是否开启自动备份存档-->
+    <boolean name="autoBackUp" value="true" />
+    <!--是否开启手动收集阳光金币-->
+    <boolean name="enableManualCollect" value="false" />
+    <!--是否关闭游戏内道具栏-->
+    <boolean name="disableShop" value="false" />
+    <!--是否开启重装兵器重力感应-->
+    <boolean name="heavyWeaponAccel" value="false" />
+    <!--是否开启菜单修改器-->
+    <boolean name="useMenu" value="true" />
+    <!--内置游戏键盘是否为隐藏状态-->
+    <boolean name="isVisible" value="false" />
+    <!--是否使用Xbox版暂停菜单-->
+    <boolean name="enableNewOptionsDialog" value="true" />
+    <!--是否使用高级暂停-->
+    <boolean name="useSpecialPause" value="false" />
+    <!--是否使用经典铲子-->
+    <boolean name="useNewShovel" value="true" />
+    <!--是否隐藏草丛和电线杆-->
+    <boolean name="hideCoverLayer" value="false" />
+    <!--是否在主界面显示大豪斯-->
+    <boolean name="showHouse" value="true" />
+    <!--是否显示卡片冷却进度-->
+    <boolean name="showCoolDown" value="false" />
+    <!--是否使用内置游戏键盘-->
+    <boolean name="useInGameKeyboard" value="true" />
+    <!--游戏画面横向放大倍率(%)，取值为0~20-->
+    <int name="scaleX" value="0" />
+    <!--游戏画面纵向放大倍率(%)，取值为0~20-->
+    <int name="scaleY" value="0" />
+    <!--是否使用原版冒险模式难度-->
+    <boolean name="normalLevel" value="true" />
+    <!--是否开启模仿者变灰色植物-->
+    <boolean name="imitater" value="true" />
+    <!--是否禁止无尽出垃圾桶僵尸-->
+    <boolean name="disableTrashBin" value="false" />
+    <!--是否使用Xbox版背景音乐-->
+    <boolean name="useXboxMusics" value="false" />
+    <!--是否置顶种子栏-->
+    <boolean name="seedBankPin" value="false" />
+    <!--是否使用动态种植预览-->
+    <boolean name="dynamicPreview" value="true" />
+    <!--是否使用OpenSL音频库-->
+    <boolean name="useOpenSL" value="true" />
+    <!--游戏使用的levels.xml难度文件ID，取值为0~2，分别对应normal,middle,hard-->
+    <int name="adventureId" value="0" />
+    <!--是否使用Android/data作为存档路径-->
+    <!--    <boolean name="useExternalPath" value="true" />-->
+</map>

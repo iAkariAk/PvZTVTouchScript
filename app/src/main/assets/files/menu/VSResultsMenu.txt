@@ -1,0 +1,117 @@
+DefineWidgetIds ( PLAY_AGAIN, QUIT_BUTTON, INFO_BOX_P1, INFO_BOX_P2, PLANT_SIDE, PLANT_SIDE_FRONT, ZOMBIE_SIDE, ZOMBIE_SIDE_FRONT, WIN_IMAGE );
+
+Enum
+(
+	COLOR_LABEL,
+	COLOR_LABEL_HILITE,
+	COLOR_DARK_OUTLINE,
+	COLOR_LIGHT_OUTLINE,
+	COLOR_MEDIUM_OUTLINE,
+	COLOR_BKG,
+	NUM_COLORS
+);
+
+Enum (
+	WIDGET_ANIMATION_IDLE,
+	WIDGET_ANIMATION_ENTER,
+	WIDGET_ANIMATION_EXIT
+	);
+
+
+Enum (
+	SLIDE_DOWN,
+	SLIDE_UP,
+	SLIDE_LEFT,
+	SLIDE_RIGHT
+);
+
+Define BUTTON_LABEL_WRAP_CENTER 2;
+
+Define EASE_IN_OUT_ANIMATOR 4;
+Define SIN_WAVE_ANIMATOR 12;
+	
+SetInitialFocus PLAY_AGAIN;
+
+Define BUTTON_Y 472;
+Define BUTTON_WIDTH 205;
+Define BUTTON_HEIGHT 96;
+
+SetBackground 'IMAGE_CHALLENGE_BACKGROUND';
+
+AddWidget LabelWidget -1;
+SetLabel '[Battle Results]';
+
+AddWidget ImageWidget PLANT_SIDE;
+SetImage 'images/plant_side';
+Resize 38 84 256 256;
+
+AddWidget ImageWidget PLANT_SIDE_FRONT;
+SetImage 'images/plant_side_plants';
+Resize 36 84 256 256;
+
+AddWidget ImageWidget ZOMBIE_SIDE;
+SetImage 'images/zombie_side';
+Resize 32 72 256 256;
+
+AddWidget ImageWidget ZOMBIE_SIDE_FRONT;
+SetImage 'images/zombie_side_zombies';
+Resize 18 72 256 256;
+
+AddWidget ImageWidget WIN_IMAGE;
+SetImage 'images/win';
+SetPos 96 385;
+
+#AddWidget ImageWidget -1;
+#SetImage 'images/plant_win_trophy';
+
+#AddWidget ImageWidget -1;
+#SetImage 'images/zombie_win_trophy';
+
+#AddWidget ImageWidget -1;
+#SetImage 'images/trophy_BaseSmall';
+
+
+AddWidget ImageWidget INFO_BOX_P1;
+SetImage 'images/vs_info_box_plants';
+Resize 340 96 446 197;
+AddAnimator WIDGET_ANIMATION_ENTER SlideInOutWidgetAnimator ( SLIDE_RIGHT );
+AddAnimator WIDGET_ANIMATION_EXIT SlideInOutWidgetAnimator ( SLIDE_RIGHT );
+
+
+AddWidget ImageWidget INFO_BOX_P2;
+SetImage 'images/vs_info_box_zombies';
+Resize 340 270 416 162;
+AddAnimator WIDGET_ANIMATION_ENTER SlideInOutWidgetAnimator ( SLIDE_RIGHT, 20 );
+AddAnimator WIDGET_ANIMATION_EXIT SlideInOutWidgetAnimator ( SLIDE_RIGHT, 20);
+
+#
+# VSResultsMenu
+#
+
+AddWidget LawnButtonWidget PLAY_AGAIN;
+SetImage 'images/VS Button';
+SetOverImage 'images/VS Button_selected';
+SetFont 'FONT_DWARVENTODCRAFT24';
+SetColor COLOR_LABEL (25,197,45);
+SetColor COLOR_LABEL_HILITE (277,225,108);
+SetLabelJustify BUTTON_LABEL_WRAP_CENTER;
+SetLabel '[PLAY_AGAIN]';
+Resize 180 BUTTON_Y BUTTON_WIDTH BUTTON_HEIGHT;
+SetGameLinks -1 -1 -1 QUIT_BUTTON;
+
+AddWidget LawnButtonWidget QUIT_BUTTON;
+SetImage 'images/VS Button';
+SetOverImage 'images/VS Button_selected';
+SetFont 'FONT_DWARVENTODCRAFT24';
+SetColor COLOR_LABEL (25,197,45);
+SetColor COLOR_LABEL_HILITE (277,225,108);
+SetLabelJustify BUTTON_LABEL_WRAP_CENTER;
+SetLabel '[QUIT_VS]';
+Resize 420 BUTTON_Y BUTTON_WIDTH BUTTON_HEIGHT;
+SetGameLinks -1 -1 PLAY_AGAIN -1;
+
+#AddWidget HelpBarWidget HELP_BAR;
+#AddHelpButton A '[SELECT]';
+#AddHelpButton B '[BACK]';
+#AddAnimator WIDGET_ANIMATION_ENTER SlideInOutWidgetAnimator ( SLIDE_DOWN );
+#AddAnimator WIDGET_ANIMATION_EXIT SlideInOutWidgetAnimator ( SLIDE_DOWN );

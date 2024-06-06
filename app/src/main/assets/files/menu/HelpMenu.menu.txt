@@ -1,0 +1,289 @@
+
+#
+# Help Screen
+#
+
+
+#Page 1
+AddWidget HelpImageWidget PAGE_1_BACK;
+SetHelpImage 'images/help_menu_paper01';
+Resize 35 45 730 514;
+
+AddWidget HelpTextWidget PAGE_1_TITLE;
+SetText '[HELP_TEXT_1_TITLE]';
+SetHelpFont 'FONT_HOUSEOFTERROR28';
+Resize 185 55 800 50;
+SetHelpColor 255 255 255 255;
+
+AddWidget HelpTextWidget PAGE_1_1;
+SetJustification right;
+SetText '[HELP_TEXT_PAGE_1_1]';
+SetHelpFont 'FONT_BRIANNETOD16';
+Resize 10 102 515 72;
+SetHelpColor 0 0 0 255;
+
+AddWidget HelpImageWidget PAGE_1_1_IMAGE_SHADOW;
+SetHelpImage 'images/help_menu_image_shadow';
+Resize 290 85 120 120;
+
+AddWidget HelpImageWidget PAGE_1_1_IMAGE;
+SetHelpImage 'images/help_sun_shot';
+Resize 285 80 118 118;
+
+AddWidget HelpTextWidget PAGE_1_2;
+SetText '[HELP_TEXT_PAGE_1_2]';
+SetHelpFont 'FONT_BRIANNETOD16';
+Resize 140 155 700 72;
+SetHelpColor 0 0 0 255;
+
+AddWidget HelpImageWidget PAGE_1_2_IMAGE_SHADOW;
+SetHelpImage 'images/help_menu_image_shadow';
+Resize 70 135 120 120;
+
+AddWidget HelpImageWidget PAGE_1_2_IMAGE;
+SetHelpImage 'images/help_menu_image_plants';
+Resize 65 130 118 118;
+
+AddWidget HelpTextWidget PAGE_1_3;
+SetJustification right;
+SetText '[HELP_TEXT_PAGE_1_3]';
+SetHelpFont 'FONT_BRIANNETOD16';
+Resize 10 223 515 72;
+SetHelpColor 0 0 0 255;
+
+AddWidget HelpImageWidget PAGE_1_3_IMAGE_SHADOW;
+SetHelpImage 'images/help_menu_image_shadow';
+Resize 285 200 120 120;
+
+AddWidget HelpImageWidget PAGE_1_3_IMAGE;
+SetHelpImage 'images/help_menu_image_zombies';
+Resize 280 195 118 118;
+
+AddWidget HelpTextWidget PAGE_1_PAGE;
+SetText '[HELP_TEXT_PAGE_1_OF_X]';
+SetHelpFont 'FONT_HOUSEOFTERROR16';
+SetHelpColor 255 255 255 255;
+Resize 65 255 300 60;
+
+
+#Page 2
+AddWidget HelpImageWidget PAGE_2_BACK;
+SetHelpImage 'images/help_menu_paper01';
+Resize 1315 45 730 514;
+
+AddWidget HelpTextWidget PAGE_2_TITLE;
+SetText '[HELP_TEXT_2_TITLE]';
+SetHelpFont 'FONT_HOUSEOFTERROR28';
+Resize 1465 55 800 50;
+SetHelpColor 255 255 255 255;
+
+AddWidget HelpImageWidget PAGE_2_CONTROLLER;
+SetHelpImage 'images/help_menu_image_controller';
+Resize 1400 105 0 0;
+
+AddWidget HelpTextWidget PAGE_2_LSTICK;
+SetText '[HELP_TEXT_2_LSTICK]';
+SetHelpFont 'FONT_BRIANNETOD16';
+Resize 1400 155 800 200;
+SetHelpColor 0 0 0 255;
+
+AddWidget HelpTextWidget PAGE_2_X;
+SetText '[HELP_TEXT_2_X]';
+SetHelpFont 'FONT_BRIANNETOD16';
+Resize 1400 180 800 200;
+SetHelpColor 0 0 0 255;
+
+AddWidget HelpTextWidget PAGE_2_A;
+SetText '[HELP_TEXT_2_A]';
+SetHelpFont 'FONT_BRIANNETOD16';
+Resize 1400 105 800 200;
+SetHelpColor 0 0 0 255;
+
+AddWidget HelpTextWidget PAGE_2_B;
+SetText '[HELP_TEXT_2_B]';
+SetHelpFont 'FONT_BRIANNETOD16';
+Resize 1400 130 800 200;
+SetHelpColor 0 0 0 255;
+
+AddWidget HelpTextWidget PAGE_2_PAGE;
+SetText '[HELP_TEXT_PAGE_2_OF_X]';
+SetHelpFont 'FONT_HOUSEOFTERROR16';
+SetHelpColor 255 255 255 255;
+Resize 1345 255 300 60;
+
+#Page 3
+AddWidget HelpImageWidget PAGE_2_BACK;
+SetHelpImage 'images/help_menu_paper02';
+Resize 2595 45 730 514;
+
+AddWidget HelpTextWidget PAGE_3_TITLE;
+SetText '[PAGE_3_TITLE]';
+SetHelpFont 'FONT_HOUSEOFTERROR20';
+SetHelpColor 255 255 255 255;
+Resize 2755 55 800 50;
+
+AddWidget HelpTextWidget PAGE_3_1;
+SetText '[HELP_TEXT_3_1]';
+SetHelpFont 'FONT_BRIANNETOD16';
+Resize 2625 75 450 72;
+SetHelpColor 0 0 0 255;
+
+AddWidget HelpTextWidget PAGE_3_2;
+SetText '[HELP_TEXT_3_2]';
+SetHelpFont 'FONT_BRIANNETOD16';
+Resize 2685 140 800 72;
+SetHelpColor 0 0 0 255;
+
+AddWidget HelpTextWidget PAGE_3_3;
+SetText '[HELP_TEXT_3_3]';
+SetHelpFont 'FONT_BRIANNETOD16';
+Resize 2625 205 800 72;
+SetHelpColor 0 0 0 255;
+
+AddWidget HelpImageWidget PAGE_3_1_IMAGE_SHADOW;
+SetHelpImage 'images/help_menu_image_shadow';
+Resize 2860 70 120 120;
+
+AddWidget HelpImageWidget PAGE_3_1_IMAGE_VS_CONTROLLERS;
+SetHelpImage 'images/help_menu_image_vs_controllers';
+Resize 2855 65 119 119;
+
+AddWidget HelpImageWidget PAGE_3_2_IMAGE_SHADOW;
+SetHelpImage 'images/help_menu_image_shadow';
+Resize 2625 140 120 120;
+
+AddWidget HelpImageWidget PAGE_3_2_IMAGE_VS_TARGETS;
+SetHelpImage 'images/help_menu_image_vs_targets';
+Resize 2620 135 119 119;
+
+AddWidget HelpImageWidget PAGE_3_3_IMAGE_SHADOW;
+SetHelpImage 'images/help_menu_image_shadow';
+Resize 2860 210 120 120;
+
+AddWidget HelpImageWidget PAGE_3_3_IMAGE_VS_BRAINS;
+SetHelpImage 'images/help_menu_image_vs_brains';
+Resize 2855 205 119 119;
+
+AddWidget HelpTextWidget PAGE_3_PAGE;
+SetText '[HELP_TEXT_PAGE_3_OF_X]';
+SetHelpFont 'FONT_HOUSEOFTERROR16';
+SetHelpColor 255 255 255 255;
+Resize 2625 255 300 60;
+
+#page 4
+AddWidget HelpImageWidget PAGE_2_BACK;
+SetHelpImage 'images/help_menu_paper01';
+Resize 3875 45 730 514;
+
+AddWidget HelpTextWidget PAGE_4_TITLE;
+SetText '[PAGE_4_TITLE]';
+SetHelpFont 'FONT_HOUSEOFTERROR20';
+SetHelpColor 255 255 255 255;
+Resize 4035 55 800 50;
+
+AddWidget HelpTextWidget PAGE_4_1;
+SetText '[HELP_TEXT_4_1]';
+SetHelpFont 'FONT_BRIANNETOD16';
+Resize 3905 75 450 72;
+SetHelpColor 0 0 0 255;
+
+AddWidget HelpTextWidget PAGE_4_2;
+SetText '[HELP_TEXT_4_2]';
+SetHelpFont 'FONT_BRIANNETOD16';
+Resize 3975 145 450 72;
+SetHelpColor 0 0 0 255;
+
+AddWidget HelpTextWidget PAGE_4_3;
+SetText '[HELP_TEXT_4_3]';
+SetHelpFont 'FONT_BRIANNETOD16';
+Resize 3905 220 450 72;
+SetHelpColor 0 0 0 255;
+
+AddWidget HelpImageWidget PAGE_4_1_IMAGE_SHADOW;
+SetHelpImage 'images/help_menu_image_shadow';
+Resize 4130 70 120 120;
+
+AddWidget HelpImageWidget PAGE_4_1_IMAGE_MENU;
+SetHelpImage 'images/help_menu_image_coop_menu';
+Resize 4135 65 119 119;
+
+AddWidget HelpImageWidget PAGE_4_2_IMAGE_SHADOW;
+SetHelpImage 'images/help_menu_image_shadow';
+Resize 3910 140 120 120;
+
+AddWidget HelpImageWidget PAGE_4_2_IMAGE_SUN;
+SetHelpImage 'images/help_menu_image_coop_sun';
+Resize 3905 135 120 120;
+
+AddWidget HelpImageWidget PAGE_4_3_IMAGE_SHADOW;
+SetHelpImage 'images/help_menu_image_shadow';
+Resize 4140 210 120 120;
+
+AddWidget HelpImageWidget PAGE_4_3_IMAGE_BUTTER;
+SetHelpImage 'images/help_menu_image_coop_butter';
+Resize 4135 205 120 120;
+
+AddWidget HelpTextWidget PAGE_4_PAGE;
+SetText '[HELP_TEXT_PAGE_4_OF_X]';
+SetHelpFont 'FONT_HOUSEOFTERROR16';
+SetHelpColor 255 255 255 255;
+Resize 3905 255 300 60;
+
+#page 5
+AddWidget HelpImageWidget PAGE_5_BACK;
+SetHelpImage 'images/help_menu_paper02';
+Resize 5155 45 730 514;
+
+AddWidget HelpTextWidget PAGE_5_TITLE;
+SetText '[PAGE_5_TITLE]';
+SetHelpFont 'FONT_HOUSEOFTERROR20';
+SetHelpColor 255 255 255 255;
+Resize 5315 55 800 50;
+
+AddWidget HelpTextWidget PAGE_5_1;
+SetText '[HELP_TEXT_5_1]';
+SetHelpFont 'FONT_BRIANNETOD16';
+Resize 5185 75 450 72;
+SetHelpColor 0 0 0 255;
+
+AddWidget HelpTextWidget PAGE_5_2;
+SetText '[HELP_TEXT_5_2]';
+SetHelpFont 'FONT_BRIANNETOD16';
+Resize 5255 145 450 72;
+SetHelpColor 0 0 0 255;
+
+AddWidget HelpTextWidget PAGE_5_3;
+SetText '[HELP_TEXT_5_3]';
+SetHelpFont 'FONT_BRIANNETOD16';
+Resize 5185 220 450 72;
+SetHelpColor 0 0 0 255;
+
+AddWidget HelpImageWidget PAGE_5_1_IMAGE_SHADOW;
+SetHelpImage 'images/help_menu_image_shadow';
+Resize 5420 70 120 120;
+
+AddWidget HelpImageWidget PAGE_5_1_IMAGE_HOUSE;
+SetHelpImage 'images/help_menu_image_house';
+Resize 5415 65 119 119;
+
+AddWidget HelpImageWidget PAGE_5_2_IMAGE_SHADOW;
+SetHelpImage 'images/help_menu_image_shadow';
+Resize 5190 140 120 120;
+
+AddWidget HelpImageWidget PAGE_5_2_IMAGE_PILES;
+SetHelpImage 'images/help_image_piles';
+Resize 5185 135 120 120;
+
+AddWidget HelpImageWidget PAGE_5_3_IMAGE_SHADOW;
+SetHelpImage 'images/help_menu_image_shadow';
+Resize 5420 210 120 120;
+
+AddWidget HelpImageWidget PAGE_5_3_IMAGE_BUTTER;
+SetHelpImage 'images/help_menu_image_achmt';
+Resize 5415 205 120 120;
+
+AddWidget HelpTextWidget PAGE_5_PAGE;
+SetText '[HELP_TEXT_PAGE_5_OF_X]';
+SetHelpFont 'FONT_HOUSEOFTERROR16';
+SetHelpColor 255 255 255 255;
+Resize 5185 255 300 60;

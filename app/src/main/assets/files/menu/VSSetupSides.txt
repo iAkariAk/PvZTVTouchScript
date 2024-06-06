@@ -1,0 +1,111 @@
+DefineWidgetIds ( BACKGROUND_FRAME, PLANT_SIDE, PLANT_SIDE_MID, PLANT_SIDE_FRONT, ZOMBIE_SIDE, ZOMBIE_SIDE_MID, ZOMBIE_SIDE_FRONT, CONTROLLER_0, CONTROLLER_1, QUICK_BUTTON, CUSTOM_BUTTON, RANDOM_BUTTON );
+
+Enum (
+	WIDGET_ANIMATION_IDLE,
+	WIDGET_ANIMATION_ENTER,
+	WIDGET_ANIMATION_EXIT
+	);
+
+Enum
+(
+	COLOR_LABEL,
+	COLOR_LABEL_HILITE,
+	COLOR_DARK_OUTLINE,
+	COLOR_LIGHT_OUTLINE,
+	COLOR_MEDIUM_OUTLINE,
+	COLOR_BKG,
+	NUM_COLORS
+);
+
+Define BUTTON_LABEL_WRAP_CENTER 2;
+
+Define EASE_IN_OUT_ANIMATOR 4;
+Define SIN_WAVE_ANIMATOR 12;
+
+Define BUTTON_Y 485;
+Define BUTTON_WIDTH 205;
+Define BUTTON_HEIGHT 96;
+
+AddWidget ImageWidget BACKGROUND_FRAME;
+SetImage 'images/vs_setup_back';
+Resize 12 72 776 466;
+
+#AddWidget ImageWidget PLANT_SIDE;
+#SetImage 'images/plant_side';
+#Resize 30 140 256 256;
+
+AddWidget ImageWidget PLANT_SIDE_MID;
+SetImage 'images/plant_side_selected';
+Resize 30 164 256 256;
+
+AddWidget ImageWidget PLANT_SIDE_FRONT;
+SetImage 'images/plant_side_plants';
+Resize 30 164 256 256;
+
+#AddWidget ImageWidget ZOMBIE_SIDE;
+#SetImage 'images/zombie_side';
+#Resize 470 140 256 256;
+
+AddWidget ImageWidget ZOMBIE_SIDE_MID;
+SetImage 'images/zombie_side_selected';
+Resize 483 170 256 256;
+
+AddWidget ImageWidget ZOMBIE_SIDE_FRONT;
+SetImage 'images/zombie_side_zombies';
+Resize 472 156 256 256;
+
+AddWidget ImageWidget CONTROLLER_0;
+SetImage 'images/gamepad0';
+Resize 325 200 150 100;
+
+AddWidget ImageWidget CONTROLLER_1;
+SetImage 'images/gamepad1';
+Resize 325 350 150 100;
+
+AddWidget LabelWidget -1;
+SetAlign 1;
+SetColor COLOR_LABEL (255,255,255);
+SetFont 'FONT_DWARVENTODCRAFT24';
+SetLabel 'VS_PICK_SIDES';
+Resize 400 112 100 90;
+
+
+AddWidget LawnButtonWidget QUICK_BUTTON;
+SetImage 'images/VS Button';
+SetOverImage 'images/VS Button_selected';
+SetFont 'FONT_DWARVENTODCRAFT24';
+SetColor COLOR_LABEL (25,197,45);
+SetColor COLOR_LABEL_HILITE (277,225,108);
+SetLabelJustify BUTTON_LABEL_WRAP_CENTER;
+SetLabel '[QUICK_PLAY]';
+Resize 80 BUTTON_Y BUTTON_WIDTH BUTTON_HEIGHT;
+SetGameLinks -1 -1 -1 CUSTOM_BUTTON;
+
+AddWidget LawnButtonWidget CUSTOM_BUTTON;
+SetImage 'images/VS Button';
+SetOverImage 'images/VS Button_selected';
+SetFont 'FONT_DWARVENTODCRAFT24';
+SetColor COLOR_LABEL (25,197,45);
+SetColor COLOR_LABEL_HILITE (277,225,108);
+SetLabelJustify BUTTON_LABEL_WRAP_CENTER;
+SetLabel '[CUSTOM_BATTLE]';
+Resize 300 BUTTON_Y BUTTON_WIDTH BUTTON_HEIGHT;
+SetGameLinks -1 -1 QUICK_BUTTON RANDOM_BUTTON;
+
+AddWidget LawnButtonWidget RANDOM_BUTTON;
+SetImage 'images/VS Button';
+SetOverImage 'images/VS Button_selected';
+SetFont 'FONT_DWARVENTODCRAFT24';
+SetColor COLOR_LABEL (25,197,45);
+SetColor COLOR_LABEL_HILITE (277,225,108);
+SetLabelJustify BUTTON_LABEL_WRAP_CENTER;
+SetLabel '[RANDOM_BATTLE]';
+Resize 520 BUTTON_Y BUTTON_WIDTH BUTTON_HEIGHT;
+SetGameLinks -1 -1 CUSTOM_BUTTON -1;
+
+#AddWidget HelpBarWidget HELP_BAR;
+#AddHelpButton A '[SELECT]';
+#AddHelpButton B '[BACK]';
+#AddAnimator WIDGET_ANIMATION_ENTER TodCurveWidgetAnimator ( 5, (0,1000), (0,600), 100 ) 0;
+#AddAnimator WIDGET_ANIMATION_IDLE TodCurveWidgetAnimator ( 11, (0,600), (0,590), 35 ) 0;
+#AddAnimator WIDGET_ANIMATION_EXIT TodCurveWidgetAnimator ( EASE_IN_OUT_ANIMATOR, (0,600), (0,1000), 100 ) 5;

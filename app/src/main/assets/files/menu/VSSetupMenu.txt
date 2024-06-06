@@ -1,0 +1,48 @@
+DefineWidgetIds ( QUICK_BUTTON, CUSTOM_BUTTON, RANDOM_BUTTON );
+
+Enum (
+	WIDGET_ANIMATION_IDLE,
+	WIDGET_ANIMATION_ENTER,
+	WIDGET_ANIMATION_EXIT
+	);
+	
+Define EASE_IN_OUT_ANIMATOR 4;
+Define SIN_WAVE_ANIMATOR 12;
+	
+SetInitialFocus QUICK_BUTTON;
+
+Define BUTTON_X 272;
+Define BUTTON_WIDTH 256;
+Define BUTTON_HEIGHT 64;
+
+#SetBackground 'IMAGE_DECKCHOOSER_BACKGROUND';
+
+#
+# VSSetupMenu
+#
+
+AddWidget ButtonWidget QUICK_BUTTON;
+SetFont 'FONT_BRIANNETOD16';
+SetLabel 'Quick Play';
+Resize BUTTON_X 200 BUTTON_WIDTH BUTTON_HEIGHT;
+SetGameLinks -1 CUSTOM_BUTTON -1 -1;
+
+AddWidget ButtonWidget CUSTOM_BUTTON;
+SetFont 'FONT_BRIANNETOD16';
+SetLabel 'Custom Battle';
+Resize BUTTON_X 300 BUTTON_WIDTH BUTTON_HEIGHT;
+SetGameLinks QUICK_BUTTON RANDOM_BUTTON -1 -1;
+
+AddWidget ButtonWidget RANDOM_BUTTON;
+SetFont 'FONT_BRIANNETOD16';
+SetLabel 'Random Battle';
+Resize BUTTON_X 400 BUTTON_WIDTH BUTTON_HEIGHT;
+SetGameLinks CUSTOM_BUTTON -1 -1 -1;
+
+
+AddWidget HelpBarWidget HELP_BAR;
+AddHelpButton A 'Select';
+#AddHelpButton B 'Back';
+AddAnimator WIDGET_ANIMATION_ENTER TodCurveWidgetAnimator ( 5, (0,1000), (0,600), 100 ) 0;
+AddAnimator WIDGET_ANIMATION_IDLE TodCurveWidgetAnimator ( 11, (0,600), (0,590), 35 ) 0;
+AddAnimator WIDGET_ANIMATION_EXIT TodCurveWidgetAnimator ( EASE_IN_OUT_ANIMATOR, (0,600), (0,1000), 100 ) 5;

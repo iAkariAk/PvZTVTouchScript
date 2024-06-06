@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<Properties country="US" language="en" lookandfeel="NORMAL" version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="">
+	<Double id="OPTION_DLG_LABEL_FONT_SCALE">1.0</Double>
+	<Integer id="OPTION_DLG_SLIDER_LABELS_OFFSET_X">186</Integer>
+	<Integer id="OPTION_DLG_CHECKBOX_LABELS_OFFSET_X">274</Integer>
+
+	<Boolean id="STORE_USE_COMING_SOON_IMAGE_LABEL">false</Boolean>
+	<Boolean id="STORE_USE_SOLD_OUT_IMAGE_LABEL">false</Boolean>
+	<Boolean id="STORE_USE_EXTRA_SLOT_IMAGE_LABEL">false</Boolean>
+
+  <Integer id="STORE_WINTERMELON_X_SHIFT">3</Integer>
+  <Integer id="STORE_WINTERMELON_Y_SHIFT">1</Integer>
+  <Double id="STORE_WINTERMELON_SCALE">.5</Double>
+
+  <Integer id="STORE_CATTAIL_X_SHIFT">3</Integer>
+  <Integer id="STORE_CATTAIL_Y_SHIFT">1</Integer>
+  <Double id="STORE_CATTAIL_SCALE">.5</Double>
+
+  <Integer id="STORE_GOLD_MAGNET_X_SHIFT">0</Integer>
+  <Integer id="STORE_GOLD_MAGNET_Y_SHIFT">0</Integer>
+  <Double id="STORE_GOLD_MAGNET_SCALE">.5</Double>
+
+  <Integer id="STORE_SPIKEROCK_X_SHIFT">0</Integer>
+  <Integer id="STORE_SPIKEROCK_Y_SHIFT">0</Integer>
+  <Double id="STORE_SPIKEROCK_SCALE">.5</Double>
+
+  <Integer id="STORE_COBCANNON_X_SHIFT">3</Integer>
+  <Integer id="STORE_COBCANNON_Y_SHIFT">1</Integer>
+  <Double id="STORE_COBCANNON_SCALE">.3</Double>
+
+  <Integer id="STORE_GATLINGPEA_X_SHIFT">0</Integer>
+  <Integer id="STORE_GATLINGPEA_Y_SHIFT">0</Integer>
+  <Double id="STORE_GATLINGPEA_SCALE">.75</Double>
+
+  <Integer id="STORE_TWINSUNFLOWER_X_SHIFT">3</Integer>
+  <Integer id="STORE_TWINSUNFLOWER_Y_SHIFT">1</Integer>
+  <Double id="STORE_TWINSUNFLOWER_SCALE">.6</Double>
+
+  <Integer id="STORE_GLOOMSHROOM_X_SHIFT">3</Integer>
+  <Integer id="STORE_GLOOMSHROOM_Y_SHIFT">1</Integer>
+  <Double id="STORE_GLOOMSHROOM_SCALE">.5</Double>
+
+</Properties>

@@ -1,0 +1,84 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.trans.pvz'
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "com.trans.pvz"
+        minSdk 13
+        targetSdk 33
+        versionCode 1
+        versionName "1.1.1"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters 'armeabi-v7a'
+        }
+        signingConfig signingConfigs.debug
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['src/main/jniLibs']
+        }
+    }
+    signingConfigs {
+        release {
+            storeFile file('D:\\key.keystore') // Keystore文件的路径
+            storePassword 'wewewe' // Keystore密码
+            keyAlias 'key0' // Key别名
+            keyPassword 'wewewe' // Key密码
+        }
+    }
+    buildTypes {
+        release {
+            shrinkResources false
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def outputFile = output.outputFile
+            def fileName = "";
+            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                if (variant.buildType.name.equals('release')) {//如果是release包
+                    fileName = "pvz_TV_release_v${defaultConfig.versionName}.apk"
+                } else if (variant.buildType.name.equals('debug')) {//如果是debug包
+                    fileName = "pvz_TV_debug_v${defaultConfig.versionName}.apk"
+                }
+                outputFileName = fileName
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    externalNativeBuild {
+        ndkBuild {
+            path file('src/main/jni/Android.mk')
+        }
+    }
+    buildFeatures {
+        viewBinding false
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}

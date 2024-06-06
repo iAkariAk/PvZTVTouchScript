@@ -1,0 +1,195 @@
+DefineWidgetIds ( START_ADVENTURE_BUTTON, ADVENTURE_BUTTON, MORE_WAYS_BUTTON, HOUSE_BUTTON, ACHIEVEMENTS_BUTTON, HELP_AND_OPTIONS_BUTTON, UNLOCK_BUTTON, RETURN_TO_ARCADE_BUTTON, MORE_BUTTON, 
+					BACK_STONE_BUTTON, VS_BUTTON, VS_COOP_BUTTON, MINI_GAMES_BUTTON, SURVIVAL_BUTTON, PUZZLE_BUTTON,
+					BACK_POT_BUTTON, STORE_BUTTON, ZEN_BUTTON, ALMANAC_BUTTON, MAIL_BUTTON,
+					HELP_BAR );
+
+Enum (
+	WIDGET_ANIMATION_IDLE,
+	WIDGET_ANIMATION_ENTER,
+	WIDGET_ANIMATION_EXIT
+	);
+
+Define EASE_IN_OUT_ANIMATOR 4;
+Define SIN_WAVE_ANIMATOR 12;
+
+SetInitialFocus START_ADVENTURE_BUTTON;
+
+#
+# Main Menu
+#
+AddWidget MainMenuButtonWidget START_ADVENTURE_BUTTON;
+SetImage 'reanim/mainmenu3/start adventure';
+SetOverImage 'reanim/mainmenu3/start adventure selected';
+SetDownImage 'reanim/mainmenu3/start adventure pressed';
+SetGameLinks -1 MORE_WAYS_BUTTON -1 HOUSE_BUTTON;
+AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'start adventure', 'start adventure selected', 'start adventure press' );
+
+AddWidget MainMenuButtonWidget ADVENTURE_BUTTON;
+SetImage 'reanim/mainmenu3/adventure';
+SetOverImage 'reanim/mainmenu3/adventure selected';
+SetDownImage 'reanim/mainmenu3/adventure pressed';
+SetGameLinks -1 MORE_WAYS_BUTTON -1 HOUSE_BUTTON;
+AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'adventure', 'adventure selected', 'adventure press' );
+
+#AddWidget MainMenuButtonWidget COOP_BUTTON;
+#SetImage 'reanim/mainmenu3/adventure coop';
+#SetOverImage 'reanim/mainmenu3/adventure coop selected';
+#SetDownImage 'reanim/mainmenu3/adventure coop pressed';
+#SetGameLinks ADVENTURE_BUTTON MORE_WAYS_BUTTON -1 HOUSE_BUTTON;
+#AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'adventure coop', 'adventure coop selected', 'adventure coop pressed' );
+
+AddWidget MainMenuButtonWidget MORE_WAYS_BUTTON;
+SetImage 'reanim/mainmenu3/more ways';
+SetOverImage 'reanim/mainmenu3/more ways selected';
+SetDownImage 'reanim/mainmenu3/more ways pressed';
+SetGameLinks ADVENTURE_BUTTON -1 -1 HOUSE_BUTTON;
+AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'more ways', 'more ways selected' , 'more ways pressed');
+
+AddWidget MainMenuButtonWidget HOUSE_BUTTON;
+SetImage 'reanim/mainmenu3/leaderboards button';
+SetOverImage 'reanim/mainmenu3/leaderboards selected';
+SetDownImage 'reanim/mainmenu3/leaderboards pressed';
+SetGameLinks -1 -1 ADVENTURE_BUTTON ACHIEVEMENTS_BUTTON;
+AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'leaderboards button', 'leaderboards selected', 'leaderboards pressed');
+
+AddWidget MainMenuButtonWidget ACHIEVEMENTS_BUTTON;
+SetImage 'reanim/mainmenu3/achievements';
+SetOverImage 'reanim/mainmenu3/achievements selected';
+SetDownImage 'reanim/mainmenu3/achievements pressed';
+SetDisabledImage 'reanim/mainmenu3/flowerdisabled';
+SetGameLinks -1 -1 HOUSE_BUTTON HELP_AND_OPTIONS_BUTTON;
+AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'achievements', 'achievements selected', 'achievements pressed');
+
+AddWidget MainMenuButtonWidget HELP_AND_OPTIONS_BUTTON;
+SetImage 'reanim/mainmenu3/help';
+SetOverImage 'reanim/mainmenu3/help selected';
+SetDownImage 'reanim/mainmenu3/help pressed';
+SetGameLinks -1 -1 ACHIEVEMENTS_BUTTON UNLOCK_BUTTON;
+AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'help', 'help selected', 'help pressed');
+
+AddWidget MainMenuButtonWidget UNLOCK_BUTTON;
+SetImage 'reanim/mainmenu3/unlock';
+SetOverImage 'reanim/mainmenu3/unlock selected';
+SetDownImage 'reanim/mainmenu3/unlock pressed';
+SetDisabledImage 'reanim/mainmenu3/flowerdisabled';
+SetGameLinks -1 -1 HELP_AND_OPTIONS_BUTTON RETURN_TO_ARCADE_BUTTON;
+AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'unlock', 'unlock selected', 'unlock pressed');
+
+AddWidget MainMenuButtonWidget RETURN_TO_ARCADE_BUTTON;
+SetImage 'reanim/mainmenu3/return';
+SetOverImage 'reanim/mainmenu3/return selected';
+SetDownImage 'reanim/mainmenu3/return pressed';
+SetGameLinks -1 -1 UNLOCK_BUTTON MORE_BUTTON;
+AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'return', 'return selected', 'return pressed');
+
+AddWidget MainMenuButtonWidget MORE_BUTTON;
+SetImage 'reanim/mainmenu3/more';
+SetOverImage 'reanim/mainmenu3/more selected';
+SetDownImage 'reanim/mainmenu3/more pressed';
+SetGameLinks -1 -1 RETURN_TO_ARCADE_BUTTON -1;
+AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'more', 'more selected', 'more pressed');
+
+#
+# Graveyard Buttons
+#
+
+AddWidget MainMenuButtonWidget BACK_STONE_BUTTON;
+SetImage 'reanim/mainmenu3/back stone button';
+SetOverImage 'reanim/mainmenu3/back stone selected';
+SetDownImage 'reanim/mainmenu3/back stone pressed';
+SetGameLinks -1 -1 VS_BUTTON -1;
+AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'back stone button', 'back stone selected', 'back stone pressed' );
+
+AddWidget MainMenuButtonWidget VS_BUTTON;
+SetImage 'reanim/mainmenu3/vs button';
+SetOverImage 'reanim/mainmenu3/vs selected';
+SetDownImage 'reanim/mainmenu3/vs pressed';
+SetGameLinks -1 VS_COOP_BUTTON MINI_GAMES_BUTTON BACK_STONE_BUTTON;
+AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'vs button', 'vs selected', 'vs pressed' );
+
+AddWidget MainMenuButtonWidget VS_COOP_BUTTON;
+SetImage 'reanim/mainmenu3/vs coop';
+SetOverImage 'reanim/mainmenu3/vs coop selected';
+SetDownImage 'reanim/mainmenu3/vs coop pressed';
+SetGameLinks VS_BUTTON -1 MINI_GAMES_BUTTON BACK_STONE_BUTTON;
+AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'vs coop', 'vs coop selected', 'vs coop pressed' );
+
+
+AddWidget MainMenuButtonWidget MINI_GAMES_BUTTON;
+SetImage 'reanim/mainmenu3/minigames button';
+SetOverImage 'reanim/mainmenu3/minigames selected';
+SetDownImage 'reanim/mainmenu3/minigames pressed';
+SetGameLinks -1 -1 SURVIVAL_BUTTON VS_BUTTON;
+AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'minigames button', 'minigames selected', 'minigames pressed' );
+
+AddWidget MainMenuButtonWidget SURVIVAL_BUTTON;
+SetImage 'reanim/mainmenu3/survival button';
+SetOverImage 'reanim/mainmenu3/survival selected';
+SetDownImage 'reanim/mainmenu3/survival pressed';
+SetGameLinks -1 -1 PUZZLE_BUTTON MINI_GAMES_BUTTON;
+AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'survival button', 'survival selected', 'survival pressed' );
+
+AddWidget MainMenuButtonWidget PUZZLE_BUTTON;
+SetImage 'reanim/mainmenu3/puzzle button';
+SetOverImage 'reanim/mainmenu3/puzzle selected';
+SetDownImage 'reanim/mainmenu3/puzzle pressed';
+SetGameLinks -1 -1 -1 SURVIVAL_BUTTON;
+AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'puzzle button', 'puzzle selected', 'puzzle pressed' );
+
+#
+# Garage Buttons
+#
+
+AddWidget MainMenuButtonWidget BACK_POT_BUTTON;
+SetImage 'reanim/mainmenu3/back ball button';
+SetOverImage 'reanim/mainmenu3/back ball button selected';
+SetDownImage 'reanim/mainmenu3/back ball button pressed';
+SetGameLinks -1 -1 -1 MAIL_BUTTON;
+AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'back ball button', 'back ball button selected', 'back ball button pressed' );
+
+AddWidget MainMenuButtonWidget MAIL_BUTTON;
+SetImage 'reanim/mainmenu3/mail button';
+SetOverImage 'reanim/mainmenu3/mail selected';
+SetDownImage 'reanim/mainmenu3/mail pressed';
+SetGameLinks -1 -1 BACK_POT_BUTTON STORE_BUTTON;
+AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'mail button', 'mail selected', 'mail pressed' );
+
+AddWidget MainMenuButtonWidget STORE_BUTTON;
+SetImage 'reanim/mainmenu3/shop button';
+SetOverImage 'reanim/mainmenu3/shop selected';
+SetDownImage 'reanim/mainmenu3/shop pressed';
+SetGameLinks -1 -1 MAIL_BUTTON ALMANAC_BUTTON;
+AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'shop button', 'shop selected', 'shop pressed' );
+
+AddWidget MainMenuButtonWidget ALMANAC_BUTTON;
+SetImage 'reanim/mainmenu3/almanac button';
+SetOverImage 'reanim/mainmenu3/almanac selected';
+SetDownImage 'reanim/mainmenu3/almanac pressed';
+SetGameLinks -1 -1 STORE_BUTTON ZEN_BUTTON;
+AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'almanac button', 'almanac selected', 'almanac pressed' );
+
+AddWidget MainMenuButtonWidget ZEN_BUTTON;
+SetImage 'reanim/mainmenu3/zengardenbutton';
+SetOverImage 'reanim/mainmenu3/zengardenbutton selected';
+SetDownImage 'reanim/mainmenu3/zengardenbutton pressed';
+SetGameLinks -1 -1 ALMANAC_BUTTON -1;
+AddAnimator WIDGET_ANIMATION_IDLE ReanimTrackWidgetAnimator ( 'zengardenbutton', 'zengardenbutton selected', 'zengardenbutton pressed' );
+
+Enum (
+	WIDGET_ANIMATION_IDLE,
+	WIDGET_ANIMATION_ENTER,
+	WIDGET_ANIMATION_EXIT
+	);
+
+Enum (
+	SLIDE_DOWN,
+	SLIDE_UP,
+	SLIDE_LEFT,
+	SLIDE_RIGHT
+);
+
+#AddWidget HelpBarWidget HELP_BAR;
+#AddHelpButton A '[SELECT]';
+#AddHelpButton B '[BACK]';
+#AddAnimator WIDGET_ANIMATION_ENTER SlideInOutWidgetAnimator ( SLIDE_DOWN );
+#AddAnimator WIDGET_ANIMATION_EXIT SlideInOutWidgetAnimator ( SLIDE_DOWN );

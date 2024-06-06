@@ -1,0 +1,37 @@
+[<l>]
+方向键上,下,左,右
+
+[<X>]
+菜单键
+
+[ADVICE_CLICK_SHOVEL]
+把光标放在你想铲除的植物上
+然后按住 返回 键来铲掉它！
+
+
+[HELP_TEXT_2_LSTICK]
+方向键上,下,左,右           移动光标
+
+[HELP_TEXT_2_B]
+返回键                                 退出,铲除
+
+[HELP_TEXT_2_A]
+确定键                                 种植
+
+[HELP_TEXT_2_X]
+菜单键                                 扔锤子
+
+[HELP_TEXT_PAGE_1_OF_X]
+1/2 页
+
+[HELP_TEXT_PAGE_2_OF_X]
+2/2 页
+
+[ADVICE_CLICK_ON_SUN]
+掉落的阳光会自动收集！
+
+[HELP_TEXT_PAGE_1_1]
+阳光会自动收集。
+
+[BUY_MONEY_FORMAT]
+   %dV币 = %.0f米币
