@@ -29,14 +29,11 @@ void lib_main() {
     //Hook
     GetFunctionAddr();
     CallHook();
-
-    LOGD("env: %p", Symbols::NativeCore::getEnv::invoke);
-
     //Patch
     uintptr_t startAddr = (uintptr_t) Board_UpdateAddr - (uintptr_t) BOARD_UPDATE_ADDR_RELATIVE - 1;
 
-    ProcMap libMap = KittyMemory::getLibraryMap(targetLibName);
-    LOGD("对比地址：%p　: %p  :  %p", libMap.startAddr, startAddr, Libraries::GameMain::baseAddr);
+//    ProcMap libMap = KittyMemory::getLibraryMap(targetLibName);
+//    LOGD("对比地址：%p　: %p  :  %p", libMap.startAddr, startAddr, Libraries::GameMain::baseAddr);
 
     ProcMap retMap = {0};
     retMap.startAddr = (void *) startAddr;
@@ -55,17 +52,17 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
         return JNI_ERR;
     }
     fairy::utils::InitJni(vm);
-    int rc;
-    jclass fairyScriptClass = env->FindClass("com/fairy/tv/script/FairyScript");
-    if (fairyScriptClass == nullptr) return JNI_ERR;
-    static const JNINativeMethod fairyScriptMethods[] = {
-            {"execute",     "(Ljava/lang/String;Ljava/util/function/Consumer;)V", reinterpret_cast<void *>(fairy::script::Execute)},
-            {"executeFile", "(Ljava/lang/String;Ljava/util/function/Consumer;)V", reinterpret_cast<void *>(fairy::script::ExecuteFile)},
-    };
-    rc = env->RegisterNatives(fairyScriptClass, fairyScriptMethods, ARRAY_SIZE(fairyScriptMethods));
-    if (rc != JNI_OK) {
-        return rc;
-    }
+//    int rc;
+//    jclass fairyScriptClass = env->FindClass("com/fairy/tv/script/FairyScript");
+//    if (fairyScriptClass == nullptr) return JNI_ERR;
+//    static const JNINativeMethod fairyScriptMethods[] = {
+//            {"submitExecutionTask",     "(Ljava/lang/String;Ljava/lang/String;)V", reinterpret_cast<void *>(fairy::script::Execute)},
+//            {"submitFileExecutionTask", "(Ljava/lang/String;Ljava/lang/String;)V", reinterpret_cast<void *>(fairy::script::ExecuteFile)},
+//    };
+//    rc = env->RegisterNatives(fairyScriptClass, fairyScriptMethods, ARRAY_SIZE(fairyScriptMethods));
+//    if (rc != JNI_OK) {
+//        return rc;
+//    }
     return JNI_VERSION_1_6;
 }
 

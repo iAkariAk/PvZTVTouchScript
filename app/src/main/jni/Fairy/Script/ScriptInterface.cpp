@@ -84,7 +84,22 @@ namespace fairy::script {
             isInit = true;
         }
         CallAllFunctionsByParam("onUpdateApp", appAddress);
-        executeLuaTaskQueue.execute();
+        try {
+            auto packet = JNIInteraction::ReceivePacket("ScriptExecuteTask");
+            auto &content = packet.second;
+            auto separatorIndex = content.find(":");
+            auto id = content.substr(0, separatorIndex);
+            auto code = content.substr(separatorIndex + 1);
+            int rc = luaL_dostring(lua_state, code.c_str());
+            const char *result;
+            if (rc != 0) {
+                result = lua_tostring(lua_state, -1);
+                utils::LogError("lua execute -> %s", result);
+            } else {
+                result = "Success";
+                utils::LogDebug("lua execute -> %s", result);
+            }
+        } catch (...) {}
     }
 
     void ReleaseScriptsInAsset() {
@@ -110,60 +125,60 @@ namespace fairy::script {
         AAssetDir_close(dir);
     }
 
-    void Execute(JNIEnv *env, jclass thiz, jstring codeJStr, jobject onResult) {
-        auto codeStr = utils::JStringToString(env, codeJStr);
-        utils::LogDebug("lua execute: %s", codeStr.c_str());
-        jobject globalOnResult = env->NewGlobalRef(onResult);
-        executeLuaTaskQueue.submit([codeStr, globalOnResult] {
-            int rc = luaL_dostring(lua_state, codeStr.c_str());
-            const char *result;
-            if (rc != 0) {
-                result = lua_tostring(lua_state, -1);
-                utils::LogError("lua execute -> %s", result);
-            } else {
-                result = "Success";
-            }
-            auto jenv = utils::GetJniEnv();
-            utils::LogError("lua  -> %s", jenv);
-            auto resultJStr = jenv->NewStringUTF(result);
-            jclass functionClass = jenv->GetObjectClass(globalOnResult);
-            jmethodID invokeMethod = jenv->GetMethodID(functionClass, "accept",
-                                                       "(Ljava/lang/Object;)V");
-            jenv->CallVoidMethod(globalOnResult, invokeMethod, resultJStr);
-            jenv->DeleteGlobalRef(globalOnResult);
-        });
-    }
-
-    void ExecuteFile(JNIEnv *env, jclass thiz, jstring pathJStr, jobject onResult) {
-        auto pathStr = utils::JStringToString(env, pathJStr);
-        jobject globalOnResult = env->NewGlobalRef(onResult);
-        executeLuaTaskQueue.submit([pathStr, globalOnResult] {
-            utils::LogDebug("lua execute file: %s", pathStr.c_str());
-            lua_getglobal(lua_state, "package");
-            std::string pathDir = fairy::utils::GetFolderName(pathStr);
-            pathDir.append("/?.lua;");
-            pathDir.append(assetScriptsDir);
-            pathDir.append("/?.lua;");
-            lua_pushlstring(lua_state, pathDir.c_str(), pathDir.size());
-            lua_setfield(lua_state, -2, "path");
-            lua_pop(lua_state, 1);
-            int rc = luaL_dofile(lua_state, pathStr.c_str());
-            const char *result;
-            if (rc != 0) {
-                result = lua_tostring(lua_state, -1);
-                utils::LogError("lua execute -> %s", result);
-            } else {
-                result = "Success";
-            }
-            auto jenv = utils::GetJniEnv();
-            auto resultJStr = jenv->NewStringUTF(result);
-            jclass functionClass = jenv->GetObjectClass(globalOnResult);
-            jmethodID invokeMethod = jenv->GetMethodID(functionClass, "accept",
-                                                       "(Ljava/lang/Object;)V");
-            jenv->CallVoidMethod(globalOnResult, invokeMethod, resultJStr);
-            jenv->DeleteGlobalRef(globalOnResult);
-        });
-    }
+//    void Execute(JNIEnv *env, jclass thiz, jstring idJStr, jstring codeJStr) {
+//        auto code = utils::JStringToString(env, codeJStr);
+//        utils::LogDebug("lua execute: %s", code.c_str());
+//        auto id = utils::JStringToString(env, idJStr);
+//        executeLuaTaskQueue.submit([code, id] {
+//            int rc = luaL_dostring(lua_state, code.c_str());
+//            const char *result;
+//            if (rc != 0) {
+//                result = lua_tostring(lua_state, -1);
+//                utils::LogError("lua execute -> %s", result);
+//            } else {
+//                result = "Success";
+//            }
+//            auto jenv = utils::GetJniEnv();
+//            utils::LogError("lua  -> %s", jenv);
+//            auto resultJStr = jenv->NewStringUTF(result);
+//            jclass functionClass = jenv->GetObjectClass(globalOnResult);
+//            jmethodID invokeMethod = jenv->GetMethodID(functionClass, "accept",
+//                                                       "(Ljava/lang/Object;)V");
+//            jenv->CallVoidMethod(globalOnResult, invokeMethod, resultJStr);
+//            jenv->DeleteGlobalRef(globalOnResult);
+//        });
+//    }
+//
+//    void ExecuteFile(JNIEnv *env, jclass thiz, jstring pathJStr, jobject onResult) {
+//        auto pathStr = utils::JStringToString(env, pathJStr);
+//        jobject globalOnResult = env->NewGlobalRef(onResult);
+//        executeLuaTaskQueue.submit([pathStr, globalOnResult] {
+//            utils::LogDebug("lua execute file: %s", pathStr.c_str());
+//            lua_getglobal(lua_state, "package");
+//            std::string pathDir = fairy::utils::GetFolderName(pathStr);
+//            pathDir.append("/?.lua;");
+//            pathDir.append(assetScriptsDir);
+//            pathDir.append("/?.lua;");
+//            lua_pushlstring(lua_state, pathDir.c_str(), pathDir.size());
+//            lua_setfield(lua_state, -2, "path");
+//            lua_pop(lua_state, 1);
+//            int rc = luaL_dofile(lua_state, pathStr.c_str());
+//            const char *result;
+//            if (rc != 0) {
+//                result = lua_tostring(lua_state, -1);
+//                utils::LogError("lua execute -> %s", result);
+//            } else {
+//                result = "Success";
+//            }
+//            auto jenv = utils::GetJniEnv();
+//            auto resultJStr = jenv->NewStringUTF(result);
+//            jclass functionClass = jenv->GetObjectClass(globalOnResult);
+//            jmethodID invokeMethod = jenv->GetMethodID(functionClass, "accept",
+//                                                       "(Ljava/lang/Object;)V");
+//            jenv->CallVoidMethod(globalOnResult, invokeMethod, resultJStr);
+//            jenv->DeleteGlobalRef(globalOnResult);
+//        });
+//    }
 
 
 //    void ParseFnParam(const char *sign, ffi_type *&returnType, ffi_type **params) {
@@ -741,6 +756,7 @@ namespace fairy::script {
         lua_register(lua_state, "dlopen", LuaCall_dlopen);
         lua_register(lua_state, "dlsym", LuaCall_dlsym);
         lua_register(lua_state, "dlclose", LuaCall_dlclose);
+        utils::LogDebug("finish loading global function");
         return true;
     }
 }

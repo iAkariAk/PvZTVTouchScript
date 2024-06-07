@@ -35,7 +35,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.support.CkHomuraMenu;
@@ -55,7 +54,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -634,9 +632,7 @@ public class EnhanceActivity extends MainActivity {
             executeBtn.setText("execute");
             executeBtn.setBackgroundColor(0xFF3574F0);
             executeBtn.setOnClickListener(v2 -> {
-                FairyScript.execute(inputEdit.getText().toString(), result -> {
-                    Toast.makeText(this, result, Toast.LENGTH_LONG).show();
-                });
+                FairyScript.submitExecutionTask(Long.toString(System.currentTimeMillis()), inputEdit.getText().toString());
             });
 
             var messagesAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_activated_1);

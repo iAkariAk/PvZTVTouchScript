@@ -8,6 +8,7 @@
 #include <fstream>
 #include <jni.h>
 #include "lua.hpp"
+#include "../JNInteraction.h"
 
 extern "C" {
 #include "lua_cjson.h"
@@ -39,9 +40,9 @@ namespace fairy::script {
 
     bool Init();
 
-    void Execute(JNIEnv *env, jclass thiz, jstring codeStr, jobject onResult);
+    void Execute(JNIEnv *env, jclass thiz, jstring idJStr, jstring codeJStr);
 
-    void ExecuteFile(JNIEnv *env, jclass thiz, jstring pathStr, jobject onResult);
+    void ExecuteFile(JNIEnv *env, jclass thiz, jstring id, jstring pathJStr);
 }
 
 #endif //PVZFREE_FAIRY_ATTRIBUTE_SCRIPTINTERFACE_H

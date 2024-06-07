@@ -25,6 +25,7 @@ add_library(Homura SHARED)
 target_sources(Homura PRIVATE
         Main.cpp
         Fairy/FUtils.cpp
+        Fairy/JNInteraction.cpp
         Fairy/Script/ScriptInterface.cpp
         Fairy/Script/Core.cpp
 )
