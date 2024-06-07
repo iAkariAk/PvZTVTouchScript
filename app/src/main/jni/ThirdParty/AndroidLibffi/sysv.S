@@ -1,440 +1,385 @@
-/* Copyright (c) 2009, 2010, 2011, 2012 ARM Ltd.
+/* -----------------------------------------------------------------------
+   sysv.S - Copyright (c) 1998, 2008, 2011 Red Hat, Inc.
+	    Copyright (c) 2011 Plausible Labs Cooperative, Inc.
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-``Software''), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+   ARM Foreign Function Interface
 
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
+   Permission is hereby granted, free of charge, to any person obtaining
+   a copy of this software and associated documentation files (the
+   ``Software''), to deal in the Software without restriction, including
+   without limitation the rights to use, copy, modify, merge, publish,
+   distribute, sublicense, and/or sell copies of the Software, and to
+   permit persons to whom the Software is furnished to do so, subject to
+   the following conditions:
 
-THE SOFTWARE IS PROVIDED ``AS IS'', WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
+   The above copyright notice and this permission notice shall be included
+   in all copies or substantial portions of the Software.
 
-#if defined(__aarch64__) || defined(__arm64__)
+   THE SOFTWARE IS PROVIDED ``AS IS'', WITHOUT WARRANTY OF ANY KIND,
+   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+   NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+   HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+   WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+   DEALINGS IN THE SOFTWARE.
+   ----------------------------------------------------------------------- */
+
+#ifdef __arm__
 #define LIBFFI_ASM
 #include <fficonfig.h>
 #include <ffi.h>
 #include <ffi_cfi.h>
 #include "internal.h"
 
-#ifdef HAVE_MACHINE_ASM_H
-#include <machine/asm.h>
+/* GCC 4.8 provides __ARM_ARCH; construct it otherwise.  */
+#ifndef __ARM_ARCH
+# if defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7A__) \
+     || defined(__ARM_ARCH_7R__) || defined(__ARM_ARCH_7M__) \
+     || defined(__ARM_ARCH_7EM__)
+#  define __ARM_ARCH 7
+# elif defined(__ARM_ARCH_6__) || defined(__ARM_ARCH_6J__) \
+        || defined(__ARM_ARCH_6K__) || defined(__ARM_ARCH_6Z__) \
+        || defined(__ARM_ARCH_6ZK__) || defined(__ARM_ARCH_6T2__) \
+	|| defined(__ARM_ARCH_6M__)
+#  define __ARM_ARCH 6
+# elif defined(__ARM_ARCH_5__) || defined(__ARM_ARCH_5T__) \
+	|| defined(__ARM_ARCH_5E__) || defined(__ARM_ARCH_5TE__) \
+	|| defined(__ARM_ARCH_5TEJ__)
+#  define __ARM_ARCH 5
+# else
+#  define __ARM_ARCH 4
+# endif
+#endif
+
+/* Conditionally compile unwinder directives.  */
+#ifdef __ARM_EABI__
+# define UNWIND(...)	__VA_ARGS__
 #else
+# define UNWIND(...)
+#endif
+
+#if defined(HAVE_AS_CFI_PSEUDO_OP) && defined(__ARM_EABI__)
+	.cfi_sections	.debug_frame
+#endif
+
+#define CONCAT(a, b)	CONCAT2(a, b)
+#define CONCAT2(a, b)	a ## b
+
 #ifdef __USER_LABEL_PREFIX__
-#define CONCAT1(a, b) CONCAT2(a, b)
-#define CONCAT2(a, b) a ## b
-
-/* Use the right prefix for global labels.  */
-#define CNAME(x) CONCAT1 (__USER_LABEL_PREFIX__, x)
+# define CNAME(X)	CONCAT (__USER_LABEL_PREFIX__, X)
 #else
-#define CNAME(x) x
+# define CNAME(X)	X
 #endif
-#endif
-
-#ifdef __AARCH64EB__
-# define BE(X)	X
+#ifdef __ELF__
+# define SIZE(X)	.size CNAME(X), . - CNAME(X)
+# define TYPE(X, Y)	.type CNAME(X), Y
 #else
-# define BE(X)	0
+# define SIZE(X)
+# define TYPE(X, Y)
 #endif
 
-#ifdef __ILP32__
-#define PTR_REG(n)      w##n
-#else
-#define PTR_REG(n)      x##n
-#endif
+#define ARM_FUNC_START_LOCAL(name)	\
+	.align	3;			\
+	TYPE(CNAME(name), %function);	\
+	CNAME(name):
 
-#ifdef __ILP32__
-#define PTR_SIZE	4
+#define ARM_FUNC_START(name)		\
+	.globl CNAME(name);		\
+	FFI_HIDDEN(CNAME(name));	\
+	ARM_FUNC_START_LOCAL(name)
+
+#define ARM_FUNC_END(name) \
+	SIZE(name)
+
+/* Aid in defining a jump table with 8 bytes between entries.  */
+/* ??? The clang assembler doesn't handle .if with symbolic expressions.  */
+#ifdef __clang__
+# define E(index)
 #else
-#define PTR_SIZE	8
+# define E(index)				\
+	.if . - 0b - 8*index;			\
+	.error "type table out of sync";	\
+	.endif
 #endif
 
 	.text
-	.align 4
+	.syntax unified
+	.arm
 
-/* ffi_call_SYSV
-   extern void ffi_call_SYSV (void *stack, void *frame,
-			      void (*fn)(void), void *rvalue,
-			      int flags, void *closure);
-
-   Therefore on entry we have:
-
-   x0 stack
-   x1 frame
-   x2 fn
-   x3 rvalue
-   x4 flags
-   x5 closure
-*/
-
-	cfi_startproc
-CNAME(ffi_call_SYSV):
-	/* Use a stack frame allocated by our caller.  */
-	cfi_def_cfa(x1, 32);
-	stp	x29, x30, [x1]
-	mov	x29, x1
-	mov	sp, x0
-	cfi_def_cfa_register(x29)
-	cfi_rel_offset (x29, 0)
-	cfi_rel_offset (x30, 8)
-
-	mov	x9, x2			/* save fn */
-	mov	x8, x3			/* install structure return */
-#ifdef FFI_GO_CLOSURES
-	mov	x18, x5			/* install static chain */
+#ifndef __clang__
+	/* We require interworking on LDM, which implies ARMv5T,
+	   which implies the existance of BLX.  */
+ 	.arch	armv5t
 #endif
-	stp	x3, x4, [x29, #16]	/* save rvalue and flags */
 
-	/* Load the vector argument passing registers, if necessary.  */
-	tbz	w4, #AARCH64_FLAG_ARG_V_BIT, 1f
-	ldp     q0, q1, [sp, #0]
-	ldp     q2, q3, [sp, #32]
-	ldp     q4, q5, [sp, #64]
-	ldp     q6, q7, [sp, #96]
-1:
-	/* Load the core argument passing registers, including
-	   the structure return pointer.  */
-	ldp     x0, x1, [sp, #16*N_V_ARG_REG + 0]
-	ldp     x2, x3, [sp, #16*N_V_ARG_REG + 16]
-	ldp     x4, x5, [sp, #16*N_V_ARG_REG + 32]
-	ldp     x6, x7, [sp, #16*N_V_ARG_REG + 48]
+	/* Note that we use STC and LDC to encode VFP instructions,
+	   so that we do not need ".fpu vfp", nor get that added to
+	   the object file attributes.  These will not be executed
+	   unless the FFI_VFP abi is used.  */
 
-	/* Deallocate the context, leaving the stacked arguments.  */
-	add	sp, sp, #CALL_CONTEXT_SIZE
+	@ r0:   stack
+	@ r1:   frame
+	@ r2:   fn
+	@ r3:	vfp_used
 
-	blr     x9			/* call fn */
+ARM_FUNC_START(ffi_call_VFP)
+	UNWIND(.fnstart)
+	cfi_startproc
 
-	ldp	x3, x4, [x29, #16]	/* reload rvalue and flags */
+	cmp	r3, #3			@ load only d0 if possible
+#ifdef __clang__
+	vldrle d0, [sp]
+	vldmgt sp, {d0-d7}
+#else
+	ldcle	p11, cr0, [r0]		@ vldrle d0, [sp]
+	ldcgt	p11, cr0, [r0], {16}	@ vldmgt sp, {d0-d7}
+#endif
+	add	r0, r0, #64		@ discard the vfp register args
+	/* FALLTHRU */
+ARM_FUNC_END(ffi_call_VFP)
 
-	/* Partially deconstruct the stack frame.  */
-	mov     sp, x29
-	cfi_def_cfa_register (sp)
-	ldp     x29, x30, [x29]
+ARM_FUNC_START(ffi_call_SYSV)
+	stm	r1, {fp, lr}
+	mov	fp, r1
 
-	/* Save the return value as directed.  */
-	adr	x5, 0f
-	and	w4, w4, #AARCH64_RET_MASK
-	add	x5, x5, x4, lsl #3
-	br	x5
+	@ This is a bit of a lie wrt the origin of the unwind info, but
+	@ now we've got the usual frame pointer and two saved registers.
+	UNWIND(.save {fp,lr})
+	UNWIND(.setfp fp, sp)
+	cfi_def_cfa(fp, 8)
+	cfi_rel_offset(fp, 0)
+	cfi_rel_offset(lr, 4)
 
-	/* Note that each table entry is 2 insns, and thus 8 bytes.
-	   For integer data, note that we're storing into ffi_arg
-	   and therefore we want to extend to 64 bits; these types
-	   have two consecutive entries allocated for them.  */
-	.align	4
-0:	ret				/* VOID */
+	mov	sp, r0		@ install the stack pointer
+	mov	lr, r2		@ move the fn pointer out of the way
+	ldr	ip, [fp, #16]	@ install the static chain
+	ldmia	sp!, {r0-r3}	@ move first 4 parameters in registers.
+	blx	lr		@ call fn
+
+	@ Load r2 with the pointer to storage for the return value
+	@ Load r3 with the return type code
+	ldr	r2, [fp, #8]
+	ldr	r3, [fp, #12]
+
+	@ Deallocate the stack with the arguments.
+	mov	sp, fp
+	cfi_def_cfa_register(sp)
+
+	@ Store values stored in registers.
+	.align	3
+	add	pc, pc, r3, lsl #3
 	nop
-1:	str	x0, [x3]		/* INT64 */
-	ret
-2:	stp	x0, x1, [x3]		/* INT128 */
-	ret
-3:	brk	#1000			/* UNUSED */
-	ret
-4:	brk	#1000			/* UNUSED */
-	ret
-5:	brk	#1000			/* UNUSED */
-	ret
-6:	brk	#1000			/* UNUSED */
-	ret
-7:	brk	#1000			/* UNUSED */
-	ret
-8:	st4	{ v0.s, v1.s, v2.s, v3.s }[0], [x3]	/* S4 */
-	ret
-9:	st3	{ v0.s, v1.s, v2.s }[0], [x3]	/* S3 */
-	ret
-10:	stp	s0, s1, [x3]		/* S2 */
-	ret
-11:	str	s0, [x3]		/* S1 */
-	ret
-12:	st4	{ v0.d, v1.d, v2.d, v3.d }[0], [x3]	/* D4 */
-	ret
-13:	st3	{ v0.d, v1.d, v2.d }[0], [x3]	/* D3 */
-	ret
-14:	stp	d0, d1, [x3]		/* D2 */
-	ret
-15:	str	d0, [x3]		/* D1 */
-	ret
-16:	str	q3, [x3, #48]		/* Q4 */
+0:
+E(ARM_TYPE_VFP_S)
+#ifdef __clang__
+	vstr s0, [r2]
+#else
+	stc	p10, cr0, [r2]		@ vstr s0, [r2]
+#endif
+	pop	{fp,pc}
+E(ARM_TYPE_VFP_D)
+#ifdef __clang__
+	vstr d0, [r2]
+#else
+	stc	p11, cr0, [r2]		@ vstr d0, [r2]
+#endif
+	pop	{fp,pc}
+E(ARM_TYPE_VFP_N)
+#ifdef __clang__
+	vstm r2, {d0-d3}
+#else
+	stc	p11, cr0, [r2], {8}	@ vstm r2, {d0-d3}
+#endif
+	pop	{fp,pc}
+E(ARM_TYPE_INT64)
+	str	r1, [r2, #4]
 	nop
-17:	str	q2, [x3, #32]		/* Q3 */
+E(ARM_TYPE_INT)
+	str	r0, [r2]
+	pop	{fp,pc}
+E(ARM_TYPE_VOID)
+	pop	{fp,pc}
 	nop
-18:	stp	q0, q1, [x3]		/* Q2 */
-	ret
-19:	str	q0, [x3]		/* Q1 */
-	ret
-20:	uxtb	w0, w0			/* UINT8 */
-	str	x0, [x3]
-21:	ret				/* reserved */
-	nop
-22:	uxth	w0, w0			/* UINT16 */
-	str	x0, [x3]
-23:	ret				/* reserved */
-	nop
-24:	mov	w0, w0			/* UINT32 */
-	str	x0, [x3]
-25:	ret				/* reserved */
-	nop
-26:	sxtb	x0, w0			/* SINT8 */
-	str	x0, [x3]
-27:	ret				/* reserved */
-	nop
-28:	sxth	x0, w0			/* SINT16 */
-	str	x0, [x3]
-29:	ret				/* reserved */
-	nop
-30:	sxtw	x0, w0			/* SINT32 */
-	str	x0, [x3]
-31:	ret				/* reserved */
-	nop
+E(ARM_TYPE_STRUCT)
+	pop	{fp,pc}
 
 	cfi_endproc
+	UNWIND(.fnend)
+ARM_FUNC_END(ffi_call_SYSV)
 
-	.globl	CNAME(ffi_call_SYSV)
-	FFI_HIDDEN(CNAME(ffi_call_SYSV))
-#ifdef __ELF__
-	.type	CNAME(ffi_call_SYSV), #function
-	.size CNAME(ffi_call_SYSV), .-CNAME(ffi_call_SYSV)
-#endif
 
-/* ffi_closure_SYSV
-
-   Closure invocation glue. This is the low level code invoked directly by
-   the closure trampoline to setup and call a closure.
-
-   On entry x17 points to a struct ffi_closure, x16 has been clobbered
-   all other registers are preserved.
-
-   We allocate a call context and save the argument passing registers,
-   then invoked the generic C ffi_closure_SYSV_inner() function to do all
-   the real work, on return we load the result passing registers back from
-   the call context.
+/*
+	int ffi_closure_inner_* (cif, fun, user_data, frame)
 */
 
-#define ffi_closure_SYSV_FS (8*2 + CALL_CONTEXT_SIZE + 64)
-
-	.align 4
-CNAME(ffi_closure_SYSV_V):
+ARM_FUNC_START(ffi_go_closure_SYSV)
 	cfi_startproc
-	stp     x29, x30, [sp, #-ffi_closure_SYSV_FS]!
-	cfi_adjust_cfa_offset (ffi_closure_SYSV_FS)
-	cfi_rel_offset (x29, 0)
-	cfi_rel_offset (x30, 8)
-
-	/* Save the argument passing vector registers.  */
-	stp     q0, q1, [sp, #16 + 0]
-	stp     q2, q3, [sp, #16 + 32]
-	stp     q4, q5, [sp, #16 + 64]
-	stp     q6, q7, [sp, #16 + 96]
+	stmdb	sp!, {r0-r3}			@ save argument regs
+	cfi_adjust_cfa_offset(16)
+	ldr	r0, [ip, #4]			@ load cif
+	ldr	r1, [ip, #8]			@ load fun
+	mov	r2, ip				@ load user_data
 	b	0f
 	cfi_endproc
+ARM_FUNC_END(ffi_go_closure_SYSV)
 
-	.globl	CNAME(ffi_closure_SYSV_V)
-	FFI_HIDDEN(CNAME(ffi_closure_SYSV_V))
-#ifdef __ELF__
-	.type	CNAME(ffi_closure_SYSV_V), #function
-	.size	CNAME(ffi_closure_SYSV_V), . - CNAME(ffi_closure_SYSV_V)
-#endif
-
-	.align	4
+ARM_FUNC_START(ffi_closure_SYSV)
+	UNWIND(.fnstart)
 	cfi_startproc
-CNAME(ffi_closure_SYSV):
-	stp     x29, x30, [sp, #-ffi_closure_SYSV_FS]!
-	cfi_adjust_cfa_offset (ffi_closure_SYSV_FS)
-	cfi_rel_offset (x29, 0)
-	cfi_rel_offset (x30, 8)
-0:
-	mov     x29, sp
+	stmdb	sp!, {r0-r3}			@ save argument regs
+	cfi_adjust_cfa_offset(16)
 
-	/* Save the argument passing core registers.  */
-	stp     x0, x1, [sp, #16 + 16*N_V_ARG_REG + 0]
-	stp     x2, x3, [sp, #16 + 16*N_V_ARG_REG + 16]
-	stp     x4, x5, [sp, #16 + 16*N_V_ARG_REG + 32]
-	stp     x6, x7, [sp, #16 + 16*N_V_ARG_REG + 48]
-
-	/* Load ffi_closure_inner arguments.  */
-	ldp	PTR_REG(0), PTR_REG(1), [x17, #FFI_TRAMPOLINE_CLOSURE_OFFSET]	/* load cif, fn */
-	ldr	PTR_REG(2), [x17, #FFI_TRAMPOLINE_CLOSURE_OFFSET+PTR_SIZE*2]	/* load user_data */
-.Ldo_closure:
-	add	x3, sp, #16				/* load context */
-	add	x4, sp, #ffi_closure_SYSV_FS		/* load stack */
-	add	x5, sp, #16+CALL_CONTEXT_SIZE		/* load rvalue */
-	mov	x6, x8					/* load struct_rval */
-	bl      CNAME(ffi_closure_SYSV_inner)
-
-	/* Load the return value as directed.  */
-	adr	x1, 0f
-	and	w0, w0, #AARCH64_RET_MASK
-	add	x1, x1, x0, lsl #3
-	add	x3, sp, #16+CALL_CONTEXT_SIZE
-	br	x1
-
-	/* Note that each table entry is 2 insns, and thus 8 bytes.  */
-	.align	4
-0:	b	99f			/* VOID */
-	nop
-1:	ldr	x0, [x3]		/* INT64 */
-	b	99f
-2:	ldp	x0, x1, [x3]		/* INT128 */
-	b	99f
-3:	brk	#1000			/* UNUSED */
-	nop
-4:	brk	#1000			/* UNUSED */
-	nop
-5:	brk	#1000			/* UNUSED */
-	nop
-6:	brk	#1000			/* UNUSED */
-	nop
-7:	brk	#1000			/* UNUSED */
-	nop
-8:	ldr	s3, [x3, #12]		/* S4 */
-	nop
-9:	ldr	s2, [x3, #8]		/* S3 */
-	nop
-10:	ldp	s0, s1, [x3]		/* S2 */
-	b	99f
-11:	ldr	s0, [x3]		/* S1 */
-	b	99f
-12:	ldr	d3, [x3, #24]		/* D4 */
-	nop
-13:	ldr	d2, [x3, #16]		/* D3 */
-	nop
-14:	ldp	d0, d1, [x3]		/* D2 */
-	b	99f
-15:	ldr	d0, [x3]		/* D1 */
-	b	99f
-16:	ldr	q3, [x3, #48]		/* Q4 */
-	nop
-17:	ldr	q2, [x3, #32]		/* Q3 */
-	nop
-18:	ldp	q0, q1, [x3]		/* Q2 */
-	b	99f
-19:	ldr	q0, [x3]		/* Q1 */
-	b	99f
-20:	ldrb	w0, [x3, #BE(7)]	/* UINT8 */
-	b	99f
-21:	brk	#1000			/* reserved */
-	nop
-22:	ldrh	w0, [x3, #BE(6)]	/* UINT16 */
-	b	99f
-23:	brk	#1000			/* reserved */
-	nop
-24:	ldr	w0, [x3, #BE(4)]	/* UINT32 */
-	b	99f
-25:	brk	#1000			/* reserved */
-	nop
-26:	ldrsb	x0, [x3, #BE(7)]	/* SINT8 */
-	b	99f
-27:	brk	#1000			/* reserved */
-	nop
-28:	ldrsh	x0, [x3, #BE(6)]	/* SINT16 */
-	b	99f
-29:	brk	#1000			/* reserved */
-	nop
-30:	ldrsw	x0, [x3, #BE(4)]	/* SINT32 */
-	nop
-31:					/* reserved */
-99:	ldp     x29, x30, [sp], #ffi_closure_SYSV_FS
-	cfi_adjust_cfa_offset (-ffi_closure_SYSV_FS)
-	cfi_restore (x29)
-	cfi_restore (x30)
-	ret
-	cfi_endproc
-
-	.globl	CNAME(ffi_closure_SYSV)
-	FFI_HIDDEN(CNAME(ffi_closure_SYSV))
-#ifdef __ELF__
-	.type	CNAME(ffi_closure_SYSV), #function
-	.size	CNAME(ffi_closure_SYSV), . - CNAME(ffi_closure_SYSV)
+#if FFI_EXEC_TRAMPOLINE_TABLE
+	ldr ip, [ip]				@ ip points to the config page, dereference to get the ffi_closure*
 #endif
+	ldr	r0, [ip, #FFI_TRAMPOLINE_CLOSURE_OFFSET]	@ load cif
+	ldr	r1, [ip, #FFI_TRAMPOLINE_CLOSURE_OFFSET+4]  @ load fun
+	ldr	r2, [ip, #FFI_TRAMPOLINE_CLOSURE_OFFSET+8]  @ load user_data
+0:
+	add	ip, sp, #16			@ compute entry sp
+	sub	sp, sp, #64+32			@ allocate frame
+	cfi_adjust_cfa_offset(64+32)
+	stmdb	sp!, {ip,lr}
+
+	/* Remember that EABI unwind info only applies at call sites.
+	   We need do nothing except note the save of the stack pointer
+	   and the link registers.  */
+	UNWIND(.save {sp,lr})
+	cfi_adjust_cfa_offset(8)
+	cfi_rel_offset(lr, 4)
+
+	add	r3, sp, #8			@ load frame
+	bl	CNAME(ffi_closure_inner_SYSV)
+
+	@ Load values returned in registers.
+	add	r2, sp, #8+64			@ load result
+	adr	r3, CNAME(ffi_closure_ret)
+	add	pc, r3, r0, lsl #3
+	cfi_endproc
+	UNWIND(.fnend)
+ARM_FUNC_END(ffi_closure_SYSV)
+
+ARM_FUNC_START(ffi_go_closure_VFP)
+	cfi_startproc
+	stmdb	sp!, {r0-r3}			@ save argument regs
+	cfi_adjust_cfa_offset(16)
+	ldr	r0, [ip, #4]			@ load cif
+	ldr	r1, [ip, #8]			@ load fun
+	mov	r2, ip				@ load user_data
+	b	0f
+	cfi_endproc
+ARM_FUNC_END(ffi_go_closure_VFP)
+
+ARM_FUNC_START(ffi_closure_VFP)
+	UNWIND(.fnstart)
+	cfi_startproc
+	stmdb	sp!, {r0-r3}			@ save argument regs
+	cfi_adjust_cfa_offset(16)
+
+#if FFI_EXEC_TRAMPOLINE_TABLE
+	ldr ip, [ip]				@ ip points to the config page, dereference to get the ffi_closure*
+#endif
+	ldr	r0, [ip, #FFI_TRAMPOLINE_CLOSURE_OFFSET]	@ load cif
+	ldr	r1, [ip, #FFI_TRAMPOLINE_CLOSURE_OFFSET+4]  @ load fun
+	ldr	r2, [ip, #FFI_TRAMPOLINE_CLOSURE_OFFSET+8]  @ load user_data
+0:
+	add	ip, sp, #16
+	sub	sp, sp, #64+32			@ allocate frame
+	cfi_adjust_cfa_offset(64+32)
+#ifdef __clang__
+	vstm sp, {d0-d7}
+#else
+	stc	p11, cr0, [sp], {16}		@ vstm sp, {d0-d7}
+#endif
+	stmdb	sp!, {ip,lr}
+
+	/* See above.  */
+	UNWIND(.save {sp,lr})
+	cfi_adjust_cfa_offset(8)
+	cfi_rel_offset(lr, 4)
+
+	add	r3, sp, #8			@ load frame
+	bl	CNAME(ffi_closure_inner_VFP)
+
+	@ Load values returned in registers.
+	add	r2, sp, #8+64			@ load result
+	adr	r3, CNAME(ffi_closure_ret)
+	add	pc, r3, r0, lsl #3
+	cfi_endproc
+	UNWIND(.fnend)
+ARM_FUNC_END(ffi_closure_VFP)
+
+/* Load values returned in registers for both closure entry points.
+   Note that we use LDM with SP in the register set.  This is deprecated
+   by ARM, but not yet unpredictable.  */
+
+ARM_FUNC_START_LOCAL(ffi_closure_ret)
+	cfi_startproc
+	cfi_rel_offset(sp, 0)
+	cfi_rel_offset(lr, 4)
+0:
+E(ARM_TYPE_VFP_S)
+#ifdef __clang__
+	vldr s0, [r2]
+#else
+	ldc	p10, cr0, [r2]			@ vldr s0, [r2]
+#endif
+	ldm	sp, {sp,pc}
+E(ARM_TYPE_VFP_D)
+#ifdef __clang__
+	vldr d0, [r2]
+#else
+	ldc	p11, cr0, [r2]			@ vldr d0, [r2]
+#endif
+	ldm	sp, {sp,pc}
+E(ARM_TYPE_VFP_N)
+#ifdef __clang__
+	vldm r2, {d0-d3}
+#else
+	ldc	p11, cr0, [r2], {8}		@ vldm r2, {d0-d3}
+#endif
+	ldm	sp, {sp,pc}
+E(ARM_TYPE_INT64)
+	ldr	r1, [r2, #4]
+	nop
+E(ARM_TYPE_INT)
+	ldr	r0, [r2]
+	ldm	sp, {sp,pc}
+E(ARM_TYPE_VOID)
+	ldm	sp, {sp,pc}
+	nop
+E(ARM_TYPE_STRUCT)
+	ldm	sp, {sp,pc}
+	cfi_endproc
+ARM_FUNC_END(ffi_closure_ret)
 
 #if FFI_EXEC_TRAMPOLINE_TABLE
 
 #ifdef __MACH__
 #include <mach/machine/vm_param.h>
-    .align PAGE_MAX_SHIFT
-CNAME(ffi_closure_trampoline_table_page):
-    .rept PAGE_MAX_SIZE / FFI_TRAMPOLINE_SIZE
-    adr x16, -PAGE_MAX_SIZE
-    ldp x17, x16, [x16]
-    br x16
-	nop		/* each entry in the trampoline config page is 2*sizeof(void*) so the trampoline itself cannot be smaller that 16 bytes */
-    .endr
 
-    .globl CNAME(ffi_closure_trampoline_table_page)
-    FFI_HIDDEN(CNAME(ffi_closure_trampoline_table_page))
-    #ifdef __ELF__
-    	.type	CNAME(ffi_closure_trampoline_table_page), #function
-    	.size	CNAME(ffi_closure_trampoline_table_page), . - CNAME(ffi_closure_trampoline_table_page)
-    #endif
+.align	PAGE_MAX_SHIFT
+ARM_FUNC_START(ffi_closure_trampoline_table_page)
+.rept	PAGE_MAX_SIZE / FFI_TRAMPOLINE_SIZE
+	adr ip, #-PAGE_MAX_SIZE   @ the config page is PAGE_MAX_SIZE behind the trampoline page
+	sub ip, #8				  @ account for pc bias
+	ldr	pc, [ip, #4]		  @ jump to ffi_closure_SYSV or ffi_closure_VFP
+.endr
+ARM_FUNC_END(ffi_closure_trampoline_table_page)
 #endif
+
+#else
+
+ARM_FUNC_START(ffi_arm_trampoline)
+0:	adr	ip, 0b
+	ldr	pc, 1f
+1:	.long	0
+ARM_FUNC_END(ffi_arm_trampoline)
 
 #endif /* FFI_EXEC_TRAMPOLINE_TABLE */
-
-#ifdef FFI_GO_CLOSURES
-	.align 4
-CNAME(ffi_go_closure_SYSV_V):
-	cfi_startproc
-	stp     x29, x30, [sp, #-ffi_closure_SYSV_FS]!
-	cfi_adjust_cfa_offset (ffi_closure_SYSV_FS)
-	cfi_rel_offset (x29, 0)
-	cfi_rel_offset (x30, 8)
-
-	/* Save the argument passing vector registers.  */
-	stp     q0, q1, [sp, #16 + 0]
-	stp     q2, q3, [sp, #16 + 32]
-	stp     q4, q5, [sp, #16 + 64]
-	stp     q6, q7, [sp, #16 + 96]
-	b	0f
-	cfi_endproc
-
-	.globl	CNAME(ffi_go_closure_SYSV_V)
-	FFI_HIDDEN(CNAME(ffi_go_closure_SYSV_V))
-#ifdef __ELF__
-	.type	CNAME(ffi_go_closure_SYSV_V), #function
-	.size	CNAME(ffi_go_closure_SYSV_V), . - CNAME(ffi_go_closure_SYSV_V)
-#endif
-
-	.align	4
-	cfi_startproc
-CNAME(ffi_go_closure_SYSV):
-	stp     x29, x30, [sp, #-ffi_closure_SYSV_FS]!
-	cfi_adjust_cfa_offset (ffi_closure_SYSV_FS)
-	cfi_rel_offset (x29, 0)
-	cfi_rel_offset (x30, 8)
-0:
-	mov     x29, sp
-
-	/* Save the argument passing core registers.  */
-	stp     x0, x1, [sp, #16 + 16*N_V_ARG_REG + 0]
-	stp     x2, x3, [sp, #16 + 16*N_V_ARG_REG + 16]
-	stp     x4, x5, [sp, #16 + 16*N_V_ARG_REG + 32]
-	stp     x6, x7, [sp, #16 + 16*N_V_ARG_REG + 48]
-
-	/* Load ffi_closure_inner arguments.  */
-	ldp	PTR_REG(0), PTR_REG(1), [x18, #PTR_SIZE]/* load cif, fn */
-	mov	x2, x18					/* load user_data */
-	b	.Ldo_closure
-	cfi_endproc
-
-	.globl	CNAME(ffi_go_closure_SYSV)
-	FFI_HIDDEN(CNAME(ffi_go_closure_SYSV))
-#ifdef __ELF__
-	.type	CNAME(ffi_go_closure_SYSV), #function
-	.size	CNAME(ffi_go_closure_SYSV), . - CNAME(ffi_go_closure_SYSV)
-#endif
-#endif /* FFI_GO_CLOSURES */
-#endif /* __arm64__ */
+#endif /* __arm__ */
 
 #if defined __ELF__ && defined __linux__
-	.section .note.GNU-stack,"",%progbits
+	.section	.note.GNU-stack,"",%progbits
 #endif
-

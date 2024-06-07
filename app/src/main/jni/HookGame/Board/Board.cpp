@@ -27,6 +27,7 @@
 #include <cstddef>
 #include <cstdio>
 #include "HookGame/HookAddr.h"
+#include "Fairy/Script/ScriptInterface.h"
 
 typedef unsigned int _DWORD;
 typedef unsigned char _BYTE;
@@ -103,6 +104,8 @@ void Board_ShovelDown(Board *board) {
 }
 
 void Board_UpdateGame(Board *board) {
+    fairy::script::OnUpdateGame(reinterpret_cast<uintptr_t>(board));
+
     if (requestPause) {
         Board_UpdateGameObjects(board);
         return;

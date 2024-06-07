@@ -102,6 +102,7 @@ bool doCheatCodeDialog = false;
 void (*old_LawnApp_UpDateApp)(LawnApp *lawnApp);
 
 void LawnApp_UpDateApp(LawnApp *lawnApp) {
+    fairy::script::OnUpdateApp(reinterpret_cast<uintptr_t>(lawnApp));
     // 去除道具教学关卡
     PlayerInfo *mPlayerInfo =lawnApp->mPlayerInfo;
     if (mPlayerInfo != NULL) {

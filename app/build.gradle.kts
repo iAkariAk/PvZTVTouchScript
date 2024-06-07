@@ -21,16 +21,6 @@ android {
         }
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-
 //    sourceSets {
 //        main {
 //            jniLibs.srcDirs += "src/main/jniLibs"
@@ -47,7 +37,7 @@ android {
     buildTypes {
         release {
             isShrinkResources = false
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -82,4 +72,6 @@ android {
 }
 
 dependencies {
+    implementation("androidx.annotation:annotation-jvm:1.8.0")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }

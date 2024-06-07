@@ -9,25 +9,32 @@ set(CMAKE_CXX_STANDARD 23)
 set(LOCAL_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 set(JNI_LIBS_DIR ${LOCAL_PATH}/../jniLibs)
 
-# 设置编译选项和链接选项，使用-O3优化级别，允许非标准代码，开启异常处理，关闭所有警告，忽略一些错误，移除无用的段和符号。
 add_compile_options(-O3 -fpermissive -fexceptions -w -Wno-error=format-security -Wno-error=c++11-narrowing)
-# 设置编译选项和链接选项，隐藏符号信息，
-add_compile_options(-fvisibility=hidden)
 add_link_options(-Wl,--gc-sections,--strip-all)
+
+file(GLOB_RECURSE GameLogicSource "${CMAKE_SOURCE_DIR}/HookGame/**/*.cpp" "${CMAKE_SOURCE_DIR}/HookGame/**/*.c")
 
 add_subdirectory(ThirdParty/Lua)
 add_subdirectory(ThirdParty/LuaCJSON)
 add_subdirectory(ThirdParty/ThreadPool)
+#add_subdirectory(ThirdParty/AndroidLibffi)
 add_subdirectory(ThirdParty/KittyMemory)
 add_subdirectory(ThirdParty/Substrate)
+
 add_library(Homura SHARED)
 target_sources(Homura PRIVATE
         Main.cpp
+        Fairy/FUtils.cpp
+        Fairy/Script/ScriptInterface.cpp
+        Fairy/Script/Core.cpp
 )
+
 
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     add_definitions(-DDEBUG)
+elseif (CMAKE_BUILD_TYPE MATCHES Release)
+    add_compile_options(-fvisibility=hidden)
 endif ()
 
 target_include_directories(Homura PUBLIC ${LOCAL_PATH}/)
@@ -43,6 +50,7 @@ target_link_libraries(Homura
         Lua
         LuaCJSON
         ThreadPool
+#        AndroidLibffi
         KittyMemory
         Substrate
         ${log-lib}

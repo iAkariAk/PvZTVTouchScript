@@ -7,10 +7,11 @@
 #include <iostream>
 //#include <opencl-c-base.h>
 #include "ScriptInterface.h"
-#include "ffi.h"
+//#include "ffi.h"
 #include "Core.h"
 #include "LuaUtils.h"
-#include "ThreadPool.h"
+#include "../../ThirdParty/Lua/lua.hpp"
+#include "Fairy/FUtils.h"
 
 namespace fairy::script {
     lua_State *lua_state;
@@ -18,22 +19,22 @@ namespace fairy::script {
     utils::TaskQueue executeLuaTaskQueue;
     std::string assetScriptsDir;
 
-    std::map<char, ffi_type *> signTypeMap = {
-            {'v', &ffi_type_void},
-            {'*', &ffi_type_pointer},
-            {'B', &ffi_type_uint8},
-            {'b', &ffi_type_sint8},
-            {'S', &ffi_type_uint16},
-            {'s', &ffi_type_sint16},
-            {'I', &ffi_type_uint32},
-            {'i', &ffi_type_sint32},
-            {'L', &ffi_type_uint64},
-            {'l', &ffi_type_sint64},
-            {'f', &ffi_type_float},
-            {'d', &ffi_type_double},
-            {'z', &ffi_type_uint8},
-            {'c', &ffi_type_pointer},
-    };
+//    std::map<char, ffi_type *> signTypeMap = {
+//            {'v', &ffi_type_void},
+//            {'*', &ffi_type_pointer},
+//            {'B', &ffi_type_uint8},
+//            {'b', &ffi_type_sint8},
+//            {'S', &ffi_type_uint16},
+//            {'s', &ffi_type_sint16},
+//            {'I', &ffi_type_uint32},
+//            {'i', &ffi_type_sint32},
+//            {'L', &ffi_type_uint64},
+//            {'l', &ffi_type_sint64},
+//            {'f', &ffi_type_float},
+//            {'d', &ffi_type_double},
+//            {'z', &ffi_type_uint8},
+//            {'c', &ffi_type_pointer},
+//    };
 
     const luaL_Reg luaLibraries[] = {
             {"_G",            luaopen_base},
@@ -79,8 +80,8 @@ namespace fairy::script {
 
     void OnUpdateApp(intptr_t appAddress) {
         if (!isInit) {
-            isInit = true;
             Init();
+            isInit = true;
         }
         CallAllFunctionsByParam("onUpdateApp", appAddress);
         executeLuaTaskQueue.execute();
@@ -109,7 +110,7 @@ namespace fairy::script {
         AAssetDir_close(dir);
     }
 
-    void Execute(JNIEnv *env, jobject thiz, jstring codeJStr, jobject onResult) {
+    void Execute(JNIEnv *env, jclass thiz, jstring codeJStr, jobject onResult) {
         auto codeStr = utils::JStringToString(env, codeJStr);
         utils::LogDebug("lua execute: %s", codeStr.c_str());
         jobject globalOnResult = env->NewGlobalRef(onResult);
@@ -123,16 +124,17 @@ namespace fairy::script {
                 result = "Success";
             }
             auto jenv = utils::GetJniEnv();
+            utils::LogError("lua  -> %s", jenv);
             auto resultJStr = jenv->NewStringUTF(result);
             jclass functionClass = jenv->GetObjectClass(globalOnResult);
-            jmethodID invokeMethod = jenv->GetMethodID(functionClass, "invoke",
-                                                       "(Ljava/lang/Object;)Ljava/lang/Object;");
-            jenv->CallObjectMethod(globalOnResult, invokeMethod, resultJStr);
+            jmethodID invokeMethod = jenv->GetMethodID(functionClass, "accept",
+                                                       "(Ljava/lang/Object;)V");
+            jenv->CallVoidMethod(globalOnResult, invokeMethod, resultJStr);
             jenv->DeleteGlobalRef(globalOnResult);
         });
     }
 
-    void ExecuteFile(JNIEnv *env, jobject thiz, jstring pathJStr, jobject onResult) {
+    void ExecuteFile(JNIEnv *env, jclass thiz, jstring pathJStr, jobject onResult) {
         auto pathStr = utils::JStringToString(env, pathJStr);
         jobject globalOnResult = env->NewGlobalRef(onResult);
         executeLuaTaskQueue.submit([pathStr, globalOnResult] {
@@ -156,268 +158,268 @@ namespace fairy::script {
             auto jenv = utils::GetJniEnv();
             auto resultJStr = jenv->NewStringUTF(result);
             jclass functionClass = jenv->GetObjectClass(globalOnResult);
-            jmethodID invokeMethod = jenv->GetMethodID(functionClass, "invoke",
-                                                       "(Ljava/lang/Object;)Ljava/lang/Object;");
-            jenv->CallObjectMethod(globalOnResult, invokeMethod, resultJStr);
+            jmethodID invokeMethod = jenv->GetMethodID(functionClass, "accept",
+                                                       "(Ljava/lang/Object;)V");
+            jenv->CallVoidMethod(globalOnResult, invokeMethod, resultJStr);
             jenv->DeleteGlobalRef(globalOnResult);
         });
     }
 
 
-    void ParseFnParam(const char *sign, ffi_type *&returnType, ffi_type **params) {
-        auto getFfiType = [](char ch) {
-            auto it = signTypeMap.find(ch);
-            if (it == signTypeMap.end()) {
-                throw "Illage param";
-            }
-            return it->second;
-        };
-
-        for (int i = 0; i < strlen(sign); i++) {
-            auto &&ch = sign[i];
-            if (i == 0) {
-                returnType = getFfiType(ch);
-            } else {
-                params[i - 1] = getFfiType(ch);
-            }
-        }
-    }
-
-
-    /**
-     * sign example: vii*lfd
-     * -> void(int, int, void *, long, float, double)
-     **/
-    int LuaCall_Invoke(lua_State *L) {
-        intptr_t address = luaL_checkinteger(L, 1);
-        const char *sign = luaL_optlstring(L, 2, nullptr, nullptr);
-        size_t signSize = strlen(sign);
-        if (signSize == 0) {
-            lua_pushstring(L, "sign is empty");
-            lua_error(L);
-        }
-        size_t paramSize = signSize - 1;
-        ffi_cif cif;
-        ffi_type *returnType;
-        ffi_type *params[signSize - 1];
-        void *args[signSize - 1];
-        void *result;
-        try {
-            ParseFnParam(sign, returnType, params);
-        } catch (const std::exception &e) {
-            lua_pushstring(L, e.what());
-            lua_error(L);
-        }
-
-        uint64_t memForArgs[paramSize + 1];
-        result = &memForArgs[paramSize];
-        for (int i = 0; i < paramSize; i++) {
-            if (sign[i + 1] == '*') {
-                *(uint64_t * ) & memForArgs[i] = luautils::toValue<uint64_t>(L, 3 + i);
-            } else if (sign[i + 1] == 'B') {
-                *(uint8_t * ) & memForArgs[i] = luautils::toValue<uint8_t>(L, 3 + i);
-            } else if (sign[i + 1] == 'b') {
-                *(int8_t * ) & memForArgs[i] = luautils::toValue<int8_t>(L, 3 + i);
-            } else if (sign[i + 1] == 'S') {
-                *(uint16_t * ) & memForArgs[i] = luautils::toValue<uint16_t>(L, 3 + i);
-            } else if (sign[i + 1] == 's') {
-                *(int16_t * ) & memForArgs[i] = luautils::toValue<int16_t>(L, 3 + i);
-            } else if (sign[i + 1] == 'I') {
-                *(uint32_t * ) & memForArgs[i] = luautils::toValue<uint32_t>(L, 3 + i);
-            } else if (sign[i + 1] == 'i') {
-                *(int32_t * ) & memForArgs[i] = luautils::toValue<int32_t>(L, 3 + i);
-            } else if (sign[i + 1] == 'L') {
-                *(uint64_t * ) & memForArgs[i] = luautils::toValue<uint64_t>(L, 3 + i);
-            } else if (sign[i + 1] == 'l') {
-                *(int64_t * ) & memForArgs[i] = luautils::toValue<int64_t>(L, 3 + i);
-            } else if (sign[i + 1] == 'f') {
-                *(float *) &memForArgs[i] = luautils::toValue<float>(L, 3 + i);
-            } else if (sign[i + 1] == 'd') {
-                *(double *) &memForArgs[i] = luautils::toValue<double>(L, 3 + i);
-            } else if (sign[i + 1] == 'z') {
-                *(uint8_t * ) & memForArgs[i] = luautils::toValue<bool>(L, 3 + i) ? 1 : 0;
-            } else if (sign[i + 1] == 'c') {
-                const char *theStr = luautils::toValue<const char *>(L, 3 + i);
-                *(intptr_t *) &memForArgs[i] = (intptr_t) theStr;
-            }
-            args[i] = &memForArgs[i];
-        }
-        ffi_prep_cif(&cif, ffi_abi::FFI_DEFAULT_ABI, paramSize, returnType, params);
-        ffi_call(&cif, reinterpret_cast<void (*)(void)>(address), result, args);
-        if (returnType == &ffi_type_void) {
-            return 0;
-        }
-        if (sign[0] == '*') {
-            luautils::pushValue<uint64_t>(L, *reinterpret_cast<uint64_t *>(result));
-        } else if (sign[0] == 'B') {
-            luautils::pushValue<uint8_t>(L, *reinterpret_cast<uint8_t *>(result));
-        } else if (sign[0] == 'b') {
-            luautils::pushValue<int8_t>(L, *reinterpret_cast<int8_t *>(result));
-        } else if (sign[0] == 'S') {
-            luautils::pushValue<uint16_t>(L, *reinterpret_cast<uint16_t *>(result));
-        } else if (sign[0] == 's') {
-            luautils::pushValue<int16_t>(L, *reinterpret_cast<int16_t *>(result));
-        } else if (sign[0] == 'I') {
-            luautils::pushValue<uint32_t>(L, *reinterpret_cast<uint32_t *>(result));
-        } else if (sign[0] == 'i') {
-            luautils::pushValue<int32_t>(L, *reinterpret_cast<int32_t *>(result));
-        } else if (sign[0] == 'L') {
-            luautils::pushValue<uint64_t>(L, *reinterpret_cast<uint64_t *>(result));
-        } else if (sign[0] == 'l') {
-            luautils::pushValue<int64_t>(L, *reinterpret_cast<int64_t *>(result));
-        } else if (sign[0] == 'f') {
-            luautils::pushValue<float>(L, *reinterpret_cast<float *>(result));
-        } else if (sign[0] == 'd') {
-            luautils::pushValue<double>(L, *reinterpret_cast<double *>(result));
-        } else if (sign[0] == 'z') {
-            luautils::pushValue<bool>(L, (*(int8_t * )(result) & 1) != 0);
-        } else if (sign[0] == 'c') {
-            luautils::pushValue<const char *>(L, (const char *) *(intptr_t *) (result));
-        }
-        return 1;
-    }
-
-    int LuaCall_CreateClosure(lua_State *L) {
-        if (!lua_isfunction(L, 2)) {
-            lua_pushstring(L, "param 2 is not a function");
-            lua_error(L);
-        }
-        const char *sign = luaL_optlstring(L, 1, nullptr, nullptr);
-        int signSize = strlen(sign);
-        int paramSize = signSize - 1;
-        if (signSize == 0) {
-            lua_pushstring(L, "sign is empty");
-            lua_error(L);
-        }
-        ffi_cif cif;
-        ffi_type *returnType;
-        ffi_type *params[paramSize];
-        void *func;
-        ffi_closure *closure;
-
-        try {
-            ParseFnParam(sign, returnType, params);
-        } catch (const std::exception &e) {
-            lua_pushstring(L, e.what());
-            lua_error(L);
-        }
+//    void ParseFnParam(const char *sign, ffi_type *&returnType, ffi_type **params) {
+//        auto getFfiType = [](char ch) {
+//            auto it = signTypeMap.find(ch);
+//            if (it == signTypeMap.end()) {
+//                throw "Illage param";
+//            }
+//            return it->second;
+//        };
+//
+//        for (int i = 0; i < strlen(sign); i++) {
+//            auto &&ch = sign[i];
+//            if (i == 0) {
+//                returnType = getFfiType(ch);
+//            } else {
+//                params[i - 1] = getFfiType(ch);
+//            }
+//        }
+//    }
 
 
-        ffi_prep_cif(&cif, FFI_DEFAULT_ABI, paramSize, returnType, params);
-        closure = reinterpret_cast<ffi_closure *>(ffi_closure_alloc(sizeof(ffi_closure), &func));
-        lua_pushvalue(L, 2);
-        int *ref = reinterpret_cast<int *>(malloc(sizeof(int)));
-        *ref = luaL_ref(L, LUA_REGISTRYINDEX);
-        ffi_prep_closure_loc(closure, &cif,
-                             [](ffi_cif *cif, void *ret, void *args[], void *user_data) {
-                                 lua_geti(lua_state, LUA_REGISTRYINDEX,
-                                          *reinterpret_cast<int *>(user_data));
+//    /**
+//     * sign example: vii*lfd
+//     * -> void(int, int, void *, long, float, double)
+//     **/
+//    int LuaCall_Invoke(lua_State *L) {
+//        intptr_t address = luaL_checkinteger(L, 1);
+//        const char *sign = luaL_optlstring(L, 2, nullptr, nullptr);
+//        size_t signSize = strlen(sign);
+//        if (signSize == 0) {
+//            lua_pushstring(L, "sign is empty");
+//            lua_error(L);
+//        }
+//        size_t paramSize = signSize - 1;
+//        ffi_cif cif;
+//        ffi_type *returnType;
+//        ffi_type *params[signSize - 1];
+//        void *args[signSize - 1];
+//        void *result;
+//        try {
+//            ParseFnParam(sign, returnType, params);
+//        } catch (const std::exception &e) {
+//            lua_pushstring(L, e.what());
+//            lua_error(L);
+//        }
+//
+//        uint64_t memForArgs[paramSize + 1];
+//        result = &memForArgs[paramSize];
+//        for (int i = 0; i < paramSize; i++) {
+//            if (sign[i + 1] == '*') {
+//                *(uint64_t * ) & memForArgs[i] = luautils::toValue<uint64_t>(L, 3 + i);
+//            } else if (sign[i + 1] == 'B') {
+//                *(uint8_t * ) & memForArgs[i] = luautils::toValue<uint8_t>(L, 3 + i);
+//            } else if (sign[i + 1] == 'b') {
+//                *(int8_t * ) & memForArgs[i] = luautils::toValue<int8_t>(L, 3 + i);
+//            } else if (sign[i + 1] == 'S') {
+//                *(uint16_t * ) & memForArgs[i] = luautils::toValue<uint16_t>(L, 3 + i);
+//            } else if (sign[i + 1] == 's') {
+//                *(int16_t * ) & memForArgs[i] = luautils::toValue<int16_t>(L, 3 + i);
+//            } else if (sign[i + 1] == 'I') {
+//                *(uint32_t * ) & memForArgs[i] = luautils::toValue<uint32_t>(L, 3 + i);
+//            } else if (sign[i + 1] == 'i') {
+//                *(int32_t * ) & memForArgs[i] = luautils::toValue<int32_t>(L, 3 + i);
+//            } else if (sign[i + 1] == 'L') {
+//                *(uint64_t * ) & memForArgs[i] = luautils::toValue<uint64_t>(L, 3 + i);
+//            } else if (sign[i + 1] == 'l') {
+//                *(int64_t * ) & memForArgs[i] = luautils::toValue<int64_t>(L, 3 + i);
+//            } else if (sign[i + 1] == 'f') {
+//                *(float *) &memForArgs[i] = luautils::toValue<float>(L, 3 + i);
+//            } else if (sign[i + 1] == 'd') {
+//                *(double *) &memForArgs[i] = luautils::toValue<double>(L, 3 + i);
+//            } else if (sign[i + 1] == 'z') {
+//                *(uint8_t * ) & memForArgs[i] = luautils::toValue<bool>(L, 3 + i) ? 1 : 0;
+//            } else if (sign[i + 1] == 'c') {
+//                const char *theStr = luautils::toValue<const char *>(L, 3 + i);
+//                *(intptr_t *) &memForArgs[i] = (intptr_t) theStr;
+//            }
+//            args[i] = &memForArgs[i];
+//        }
+//        ffi_prep_cif(&cif, ffi_abi::FFI_DEFAULT_ABI, paramSize, returnType, params);
+//        ffi_call(&cif, reinterpret_cast<void (*)(void)>(address), result, args);
+//        if (returnType == &ffi_type_void) {
+//            return 0;
+//        }
+//        if (sign[0] == '*') {
+//            luautils::pushValue<uint64_t>(L, *reinterpret_cast<uint64_t *>(result));
+//        } else if (sign[0] == 'B') {
+//            luautils::pushValue<uint8_t>(L, *reinterpret_cast<uint8_t *>(result));
+//        } else if (sign[0] == 'b') {
+//            luautils::pushValue<int8_t>(L, *reinterpret_cast<int8_t *>(result));
+//        } else if (sign[0] == 'S') {
+//            luautils::pushValue<uint16_t>(L, *reinterpret_cast<uint16_t *>(result));
+//        } else if (sign[0] == 's') {
+//            luautils::pushValue<int16_t>(L, *reinterpret_cast<int16_t *>(result));
+//        } else if (sign[0] == 'I') {
+//            luautils::pushValue<uint32_t>(L, *reinterpret_cast<uint32_t *>(result));
+//        } else if (sign[0] == 'i') {
+//            luautils::pushValue<int32_t>(L, *reinterpret_cast<int32_t *>(result));
+//        } else if (sign[0] == 'L') {
+//            luautils::pushValue<uint64_t>(L, *reinterpret_cast<uint64_t *>(result));
+//        } else if (sign[0] == 'l') {
+//            luautils::pushValue<int64_t>(L, *reinterpret_cast<int64_t *>(result));
+//        } else if (sign[0] == 'f') {
+//            luautils::pushValue<float>(L, *reinterpret_cast<float *>(result));
+//        } else if (sign[0] == 'd') {
+//            luautils::pushValue<double>(L, *reinterpret_cast<double *>(result));
+//        } else if (sign[0] == 'z') {
+//            luautils::pushValue<bool>(L, (*(int8_t * )(result) & 1) != 0);
+//        } else if (sign[0] == 'c') {
+//            luautils::pushValue<const char *>(L, (const char *) *(intptr_t *) (result));
+//        }
+//        return 1;
+//    }
 
-                                 for (int i = 0; i < cif->nargs; i++) {
-                                     if (cif->arg_types[i] == &ffi_type_pointer) {
-                                         lua_pushinteger(lua_state,
-                                                        *reinterpret_cast<uint64_t *>(args[i]));
-                                     } else if (cif->arg_types[i] == &ffi_type_uint8) {
-                                         lua_pushinteger(lua_state,
-                                                        *reinterpret_cast<uint8_t *>(args[i]));
-                                     } else if (cif->arg_types[i] == &ffi_type_sint8) {
-                                         lua_pushinteger(lua_state,
-                                                        *reinterpret_cast<int8_t *>(args[i]));
-                                     } else if (cif->arg_types[i] == &ffi_type_uint16) {
-                                         lua_pushinteger(lua_state,
-                                                        *reinterpret_cast<uint16_t *>(args[i]));
-                                     } else if (cif->arg_types[i] == &ffi_type_sint16) {
-                                         lua_pushinteger(lua_state,
-                                                        *reinterpret_cast<int16_t *>(args[i]));
-                                     } else if (cif->arg_types[i] == &ffi_type_uint32) {
-                                         lua_pushinteger(lua_state,
-                                                        *reinterpret_cast<uint32_t *>(args[i]));
-                                     } else if (cif->arg_types[i] == &ffi_type_sint32) {
-                                         lua_pushinteger(lua_state,
-                                                        *reinterpret_cast<int32_t *>(args[i]));
-                                     } else if (cif->arg_types[i] == &ffi_type_uint64) {
-                                         lua_pushinteger(lua_state,
-                                                        *reinterpret_cast<uint64_t *>(args[i]));
-                                     } else if (cif->arg_types[i] == &ffi_type_sint64) {
-                                         lua_pushinteger(lua_state,
-                                                        *reinterpret_cast<int64_t *>(args[i]));
-                                     } else if (cif->arg_types[i] == &ffi_type_float) {
-                                         lua_pushnumber(lua_state,
-                                                        *reinterpret_cast<float *>(args[i]));
-                                     } else if (cif->arg_types[i] == &ffi_type_double) {
-                                         lua_pushnumber(lua_state,
-                                                        *reinterpret_cast<double *>(args[i]));
-                                     } else if (cif->arg_types[i] == &ffi_type_longdouble) {
-                                         lua_pushnumber(lua_state,
-                                                        *reinterpret_cast<long double *>(args[i]));
-                                     }
-                                 }
-
-                                 lua_pcall(lua_state, cif->nargs, 1, 0);
-                                 ffi_type *returnType = cif->rtype;
-                                 if (returnType == &ffi_type_void) {
-                                     ret = nullptr;
-                                 } else if (returnType == &ffi_type_pointer) {
-                                     *reinterpret_cast<uint64_t *>(ret) = luaL_checknumber(
-                                             lua_state, -1);
-                                 } else if (returnType == &ffi_type_uint8) {
-                                     *reinterpret_cast<uint8_t *>(ret) = luaL_checknumber(lua_state,
-                                                                                          -1);
-                                 } else if (returnType == &ffi_type_sint8) {
-                                     *reinterpret_cast<int8_t *>(ret) = luaL_checknumber(lua_state,
-                                                                                         -1);
-                                 } else if (returnType == &ffi_type_uint16) {
-                                     *reinterpret_cast<uint16_t *>(ret) = luaL_checknumber(
-                                             lua_state, -1);
-                                 } else if (returnType == &ffi_type_sint16) {
-                                     *reinterpret_cast<int16_t *>(ret) = luaL_checknumber(lua_state,
-                                                                                          -1);
-                                 } else if (returnType == &ffi_type_uint32) {
-                                     *reinterpret_cast<uint32_t *>(ret) = luaL_checknumber(
-                                             lua_state, -1);
-                                 } else if (returnType == &ffi_type_sint32) {
-                                     *reinterpret_cast<int32_t *>(ret) = luaL_checknumber(lua_state,
-                                                                                          -1);
-                                 } else if (returnType == &ffi_type_uint64) {
-                                     *reinterpret_cast<uint64_t *>(ret) = luaL_checknumber(
-                                             lua_state, -1);
-                                 } else if (returnType == &ffi_type_sint64) {
-                                     *reinterpret_cast<int64_t *>(ret) = luaL_checknumber(lua_state,
-                                                                                          -1);
-                                 } else if (returnType == &ffi_type_float) {
-                                     *reinterpret_cast<float *>(ret) = luaL_checknumber(lua_state,
-                                                                                        -1);
-                                 } else if (returnType == &ffi_type_double) {
-                                     *reinterpret_cast<double *>(ret) = luaL_checknumber(lua_state,
-                                                                                         -1);
-                                 } else if (returnType == &ffi_type_longdouble) {
-                                     *reinterpret_cast<long double *>(ret) = luaL_checknumber(
-                                             lua_state, -1);
-                                 }
-                             }, ref, func);
-        luautils::pushValue<uint64_t>(L, reinterpret_cast<uint64_t>(func));
-        luautils::pushValue<uint64_t>(L, reinterpret_cast<uint64_t>(func));
-        luautils::pushValue<uint64_t>(L, reinterpret_cast<uint64_t>(ref));
-        return 0;
-    }
+//    int LuaCall_CreateClosure(lua_State *L) {
+//        if (!lua_isfunction(L, 2)) {
+//            lua_pushstring(L, "param 2 is not a function");
+//            lua_error(L);
+//        }
+//        const char *sign = luaL_optlstring(L, 1, nullptr, nullptr);
+//        int signSize = strlen(sign);
+//        int paramSize = signSize - 1;
+//        if (signSize == 0) {
+//            lua_pushstring(L, "sign is empty");
+//            lua_error(L);
+//        }
+//        ffi_cif cif;
+//        ffi_type *returnType;
+//        ffi_type *params[paramSize];
+//        void *func;
+//        ffi_closure *closure;
+//
+//        try {
+//            ParseFnParam(sign, returnType, params);
+//        } catch (const std::exception &e) {
+//            lua_pushstring(L, e.what());
+//            lua_error(L);
+//        }
+//
+//
+//        ffi_prep_cif(&cif, FFI_DEFAULT_ABI, paramSize, returnType, params);
+//        closure = reinterpret_cast<ffi_closure *>(ffi_closure_alloc(sizeof(ffi_closure), &func));
+//        lua_pushvalue(L, 2);
+//        int *ref = reinterpret_cast<int *>(malloc(sizeof(int)));
+//        *ref = luaL_ref(L, LUA_REGISTRYINDEX);
+//        ffi_prep_closure_loc(closure, &cif,
+//                             [](ffi_cif *cif, void *ret, void *args[], void *user_data) {
+//                                 lua_geti(lua_state, LUA_REGISTRYINDEX,
+//                                          *reinterpret_cast<int *>(user_data));
+//
+//                                 for (int i = 0; i < cif->nargs; i++) {
+//                                     if (cif->arg_types[i] == &ffi_type_pointer) {
+//                                         lua_pushinteger(lua_state,
+//                                                        *reinterpret_cast<uint64_t *>(args[i]));
+//                                     } else if (cif->arg_types[i] == &ffi_type_uint8) {
+//                                         lua_pushinteger(lua_state,
+//                                                        *reinterpret_cast<uint8_t *>(args[i]));
+//                                     } else if (cif->arg_types[i] == &ffi_type_sint8) {
+//                                         lua_pushinteger(lua_state,
+//                                                        *reinterpret_cast<int8_t *>(args[i]));
+//                                     } else if (cif->arg_types[i] == &ffi_type_uint16) {
+//                                         lua_pushinteger(lua_state,
+//                                                        *reinterpret_cast<uint16_t *>(args[i]));
+//                                     } else if (cif->arg_types[i] == &ffi_type_sint16) {
+//                                         lua_pushinteger(lua_state,
+//                                                        *reinterpret_cast<int16_t *>(args[i]));
+//                                     } else if (cif->arg_types[i] == &ffi_type_uint32) {
+//                                         lua_pushinteger(lua_state,
+//                                                        *reinterpret_cast<uint32_t *>(args[i]));
+//                                     } else if (cif->arg_types[i] == &ffi_type_sint32) {
+//                                         lua_pushinteger(lua_state,
+//                                                        *reinterpret_cast<int32_t *>(args[i]));
+//                                     } else if (cif->arg_types[i] == &ffi_type_uint64) {
+//                                         lua_pushinteger(lua_state,
+//                                                        *reinterpret_cast<uint64_t *>(args[i]));
+//                                     } else if (cif->arg_types[i] == &ffi_type_sint64) {
+//                                         lua_pushinteger(lua_state,
+//                                                        *reinterpret_cast<int64_t *>(args[i]));
+//                                     } else if (cif->arg_types[i] == &ffi_type_float) {
+//                                         lua_pushnumber(lua_state,
+//                                                        *reinterpret_cast<float *>(args[i]));
+//                                     } else if (cif->arg_types[i] == &ffi_type_double) {
+//                                         lua_pushnumber(lua_state,
+//                                                        *reinterpret_cast<double *>(args[i]));
+//                                     } else if (cif->arg_types[i] == &ffi_type_longdouble) {
+//                                         lua_pushnumber(lua_state,
+//                                                        *reinterpret_cast<long double *>(args[i]));
+//                                     }
+//                                 }
+//
+//                                 lua_pcall(lua_state, cif->nargs, 1, 0);
+//                                 ffi_type *returnType = cif->rtype;
+//                                 if (returnType == &ffi_type_void) {
+//                                     ret = nullptr;
+//                                 } else if (returnType == &ffi_type_pointer) {
+//                                     *reinterpret_cast<uint64_t *>(ret) = luaL_checknumber(
+//                                             lua_state, -1);
+//                                 } else if (returnType == &ffi_type_uint8) {
+//                                     *reinterpret_cast<uint8_t *>(ret) = luaL_checknumber(lua_state,
+//                                                                                          -1);
+//                                 } else if (returnType == &ffi_type_sint8) {
+//                                     *reinterpret_cast<int8_t *>(ret) = luaL_checknumber(lua_state,
+//                                                                                         -1);
+//                                 } else if (returnType == &ffi_type_uint16) {
+//                                     *reinterpret_cast<uint16_t *>(ret) = luaL_checknumber(
+//                                             lua_state, -1);
+//                                 } else if (returnType == &ffi_type_sint16) {
+//                                     *reinterpret_cast<int16_t *>(ret) = luaL_checknumber(lua_state,
+//                                                                                          -1);
+//                                 } else if (returnType == &ffi_type_uint32) {
+//                                     *reinterpret_cast<uint32_t *>(ret) = luaL_checknumber(
+//                                             lua_state, -1);
+//                                 } else if (returnType == &ffi_type_sint32) {
+//                                     *reinterpret_cast<int32_t *>(ret) = luaL_checknumber(lua_state,
+//                                                                                          -1);
+//                                 } else if (returnType == &ffi_type_uint64) {
+//                                     *reinterpret_cast<uint64_t *>(ret) = luaL_checknumber(
+//                                             lua_state, -1);
+//                                 } else if (returnType == &ffi_type_sint64) {
+//                                     *reinterpret_cast<int64_t *>(ret) = luaL_checknumber(lua_state,
+//                                                                                          -1);
+//                                 } else if (returnType == &ffi_type_float) {
+//                                     *reinterpret_cast<float *>(ret) = luaL_checknumber(lua_state,
+//                                                                                        -1);
+//                                 } else if (returnType == &ffi_type_double) {
+//                                     *reinterpret_cast<double *>(ret) = luaL_checknumber(lua_state,
+//                                                                                         -1);
+//                                 } else if (returnType == &ffi_type_longdouble) {
+//                                     *reinterpret_cast<long double *>(ret) = luaL_checknumber(
+//                                             lua_state, -1);
+//                                 }
+//                             }, ref, func);
+//        luautils::pushValue<uint64_t>(L, reinterpret_cast<uint64_t>(func));
+//        luautils::pushValue<uint64_t>(L, reinterpret_cast<uint64_t>(func));
+//        luautils::pushValue<uint64_t>(L, reinterpret_cast<uint64_t>(ref));
+//        return 0;
+//    }
 
     int LuaCall_HookFunction(lua_State *L) {
         intptr_t address = luaL_checkinteger(L, 1);
         intptr_t replaced = luaL_checkinteger(L, 2);
         intptr_t original = 0;
-        A64HookFunction(reinterpret_cast<void *>(address), reinterpret_cast<void *>(replaced),
-                        reinterpret_cast<void **>(&original));
+        MSHookFunction(reinterpret_cast<void *>(address), reinterpret_cast<void *>(replaced),
+                       reinterpret_cast<void **>(&original));
         luautils::pushValue(L, original);
         return 1;
     }
 
-    int LuaCall_ReleaseClosure(lua_State *L) {
-        intptr_t closure = luaL_checkinteger(L, 1);
-        intptr_t ref = luaL_checkinteger(L, 2);
-        ffi_closure_free(reinterpret_cast<void *>(closure));
-        free(reinterpret_cast<void *>(ref));
-        return 0;
-    }
+//    int LuaCall_ReleaseClosure(lua_State *L) {
+//        intptr_t closure = luaL_checkinteger(L, 1);
+//        intptr_t ref = luaL_checkinteger(L, 2);
+//        ffi_closure_free(reinterpret_cast<void *>(closure));
+//        free(reinterpret_cast<void *>(ref));
+//        return 0;
+//    }
 
     int LuaCall_dlopen(lua_State *L) {
         const char *name = luaL_optlstring(L, 1, nullptr, nullptr);
@@ -603,40 +605,6 @@ namespace fairy::script {
         return 1;
     }
 
-    int LuaCall_getEAString8(lua_State *L) {
-        intptr_t address = luaL_checkinteger(L, 1);
-        eastl::string8 *value = (eastl::string8 *) address;
-        lua_pushstring(L, value->c_str());
-        return 1;
-    }
-
-    int LuaCall_setEAString8(lua_State *L) {
-        intptr_t address = luaL_checkinteger(L, 1);
-        size_t valueSize = 0;
-        const char *value = luaL_tolstring(L, 2, &valueSize);
-        ((eastl::string8 *) address)->operator=(value); // 目前没有发现使用带长度的=函数
-        return 0;
-    }
-
-    int LuaCall_getEAString16(lua_State *L) {
-        intptr_t address = luaL_checkinteger(L, 1);
-        eastl::string16 *value = (eastl::string16 *) address;
-        std::u16string valueU16(value->c_str(), value->size());
-        std::string valueU8 = fairy::utils::String16To8(valueU16);
-        lua_pushlstring(L, valueU8.c_str(), valueU8.size());
-        return 1;
-    }
-
-    int LuaCall_setEAString16(lua_State *L) {
-        intptr_t address = luaL_checkinteger(L, 1);
-        size_t valueSize = 0;
-        const char *value = luaL_tolstring(L, 2, &valueSize);
-        std::string valueU8(value, valueSize);
-        std::u16string value16 = fairy::utils::String8To16(valueU8);
-        ((eastl::string16 *) address)->operator=(value16.c_str()); // 目前没有发现使用带长度的=函数
-        return 0;
-    }
-
     int LuaCall_malloc(lua_State *L) {
         size_t memSize = luaL_checkinteger(L, 1);
         void *memory = malloc(memSize);
@@ -729,6 +697,7 @@ namespace fairy::script {
     bool Init() {
         utils::LogDebug("Initialize lua script");
         ReleaseScriptsInAsset();
+
         lua_state = luaL_newstate();
         const luaL_Reg *lib = luaLibraries;
         while (lib->func) {
@@ -760,18 +729,14 @@ namespace fairy::script {
         lua_register(lua_state, "getFloat64", LuaCall_getFloat64);
         lua_register(lua_state, "setFloat64", LuaCall_setFloat64);
         lua_register(lua_state, "getCString8", LuaCall_getCString8);
-        lua_register(lua_state, "getEAString8", LuaCall_getEAString8);
-        lua_register(lua_state, "setEAString8", LuaCall_setEAString8);
-        lua_register(lua_state, "getEAString16", LuaCall_getEAString16);
-        lua_register(lua_state, "setEAString16", LuaCall_setEAString16);
         lua_register(lua_state, "getTime", LuaCall_getTime);
         lua_register(lua_state, "malloc", LuaCall_malloc);
         lua_register(lua_state, "free", LuaCall_free);
         lua_register(lua_state, "__log", LuaCall_log);
         lua_register(lua_state, "print", LuaCall_print);
-        lua_register(lua_state, "invoke", LuaCall_Invoke);
-        lua_register(lua_state, "createClosure", LuaCall_CreateClosure);
-        lua_register(lua_state, "releaseClosure", LuaCall_ReleaseClosure);
+//        lua_register(lua_state, "invoke", LuaCall_Invoke);
+//        lua_register(lua_state, "createClosure", LuaCall_CreateClosure);
+//        lua_register(lua_state, "releaseClosure", LuaCall_ReleaseClosure);
         lua_register(lua_state, "hookFunction", LuaCall_HookFunction);
         lua_register(lua_state, "dlopen", LuaCall_dlopen);
         lua_register(lua_state, "dlsym", LuaCall_dlsym);

@@ -39,6 +39,10 @@
 #ifdef __linux__
 #define _GNU_SOURCE 1
 #endif
+
+#include <ffi.h>
+#include <ffi_common.h>
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -128,9 +132,9 @@ struct tramp
 };
 
 enum tramp_globals_status {
-    TRAMP_GLOBALS_UNINITIALIZED = 0,
-    TRAMP_GLOBALS_PASSED,
-    TRAMP_GLOBALS_FAILED,
+	TRAMP_GLOBALS_UNINITIALIZED = 0,
+	TRAMP_GLOBALS_PASSED,
+	TRAMP_GLOBALS_FAILED,
 };
 
 /*
@@ -266,7 +270,7 @@ ffi_tramp_get_temp_file (void)
    * trampoline table to make sure that the temporary file can be mapped.
    */
   count = write(tramp_globals.fd, tramp_globals.text, tramp_globals.map_size);
-  if (count == tramp_globals.map_size && tramp_table_alloc ())
+  if (count >=0 && (size_t)count == tramp_globals.map_size && tramp_table_alloc ())
     return 1;
 
   close (tramp_globals.fd);
@@ -303,7 +307,7 @@ ffi_tramp_lock(void)
 }
 
 static void
-ffi_tramp_unlock()
+ffi_tramp_unlock(void)
 {
   pthread_mutex_unlock (&tramp_globals_mutex);
 }
@@ -374,6 +378,8 @@ tramp_table_unmap (struct tramp_table *table)
 static int
 ffi_tramp_init (void)
 {
+  long page_size;
+
   if (tramp_globals.status == TRAMP_GLOBALS_PASSED)
     return 1;
 
@@ -396,7 +402,8 @@ ffi_tramp_init (void)
     &tramp_globals.map_size);
   tramp_globals.ntramp = tramp_globals.map_size / tramp_globals.size;
 
-  if (sysconf (_SC_PAGESIZE) > tramp_globals.map_size)
+  page_size = sysconf (_SC_PAGESIZE);
+  if (page_size >= 0 && (size_t)page_size > tramp_globals.map_size)
     return 0;
 
   if (ffi_tramp_init_os ())
@@ -679,26 +686,31 @@ ffi_tramp_free (void *arg)
 #include <stddef.h>
 
 int
-ffi_tramp_is_supported(void) {
-    return 0;
+ffi_tramp_is_supported(void)
+{
+  return 0;
 }
 
 void *
-ffi_tramp_alloc(int flags) {
-    return NULL;
+ffi_tramp_alloc (int flags)
+{
+  return NULL;
 }
 
 void
-ffi_tramp_set_parms(void *arg, void *target, void *data) {
+ffi_tramp_set_parms (void *arg, void *target, void *data)
+{
 }
 
 void *
-ffi_tramp_get_addr(void *arg) {
-    return NULL;
+ffi_tramp_get_addr (void *arg)
+{
+  return NULL;
 }
 
 void
-ffi_tramp_free(void *arg) {
+ffi_tramp_free (void *arg)
+{
 }
 
 #endif /* FFI_EXEC_STATIC_TRAMP */

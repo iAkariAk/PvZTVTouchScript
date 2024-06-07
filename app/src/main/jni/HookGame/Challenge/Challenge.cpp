@@ -26,6 +26,7 @@ bool requestJumpSurvivalStage = false;
 void (*old_Challenge_Update)(Challenge *a);
 
 void Challenge_Update(Challenge *challenge) {
+    fairy::script::OnUpdateChallenge(reinterpret_cast<uintptr_t>(challenge));
     if (requestJumpSurvivalStage) {
         //如果玩家按了无尽跳关
         if (challenge->mSurvivalStage > 0 || challenge->mApp->mGameScene == GameScenes::Playing) {

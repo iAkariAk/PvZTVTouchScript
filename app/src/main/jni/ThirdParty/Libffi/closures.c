@@ -26,12 +26,12 @@
    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
    DEALINGS IN THE SOFTWARE.
    ----------------------------------------------------------------------- */
-#define FFI_CLOSURE_PTR(p) ((void*)(p))
-#define FFI_RESTORE_PTR(p) ((void*)(p))
 
 #if (defined __linux__ || defined __CYGWIN__) && !defined _GNU_SOURCE
 #define _GNU_SOURCE 1
 #endif
+
+#ifndef __EMSCRIPTEN__
 
 #include <fficonfig.h>
 #include <ffi.h>
@@ -216,7 +216,7 @@ ffi_trampoline_table_alloc (void)
   /* Allocate two pages -- a config page and a placeholder page */
   config_page = 0x0;
   kt = vm_allocate (mach_task_self (), &config_page, PAGE_MAX_SIZE * 2,
-            VM_FLAGS_ANYWHERE);
+		    VM_FLAGS_ANYWHERE);
   if (kt != KERN_SUCCESS)
     return NULL;
 
@@ -234,8 +234,8 @@ ffi_trampoline_table_alloc (void)
   trampoline_page_template &= ~1UL;
 #endif
   kt = vm_remap (mach_task_self (), &trampoline_page, PAGE_MAX_SIZE, 0x0,
-         VM_FLAGS_OVERWRITE, mach_task_self (), trampoline_page_template,
-         FALSE, &cur_prot, &max_prot, VM_INHERIT_SHARE);
+		 VM_FLAGS_OVERWRITE, mach_task_self (), trampoline_page_template,
+		 FALSE, &cur_prot, &max_prot, VM_INHERIT_SHARE);
   if (kt != KERN_SUCCESS)
     {
       vm_deallocate (mach_task_self (), config_page, PAGE_MAX_SIZE * 2);
@@ -267,13 +267,13 @@ ffi_trampoline_table_alloc (void)
     {
       ffi_trampoline_table_entry *entry = &table->free_list_pool[i];
       entry->trampoline =
-    (void *) (trampoline_page + (i * FFI_TRAMPOLINE_SIZE));
+	(void *) (trampoline_page + (i * FFI_TRAMPOLINE_SIZE));
 #ifdef HAVE_PTRAUTH
       entry->trampoline = ptrauth_sign_unauthenticated(entry->trampoline, ptrauth_key_function_pointer, 0);
 #endif
 
       if (i < table->free_count - 1)
-    entry->next = &table->free_list_pool[i + 1];
+	entry->next = &table->free_list_pool[i + 1];
     }
 
   table->free_list = table->free_list_pool;
@@ -315,16 +315,16 @@ ffi_closure_alloc (size_t size, void **code)
     {
       table = ffi_trampoline_table_alloc ();
       if (table == NULL)
-    {
-      pthread_mutex_unlock (&ffi_trampoline_lock);
-      free (closure);
-      return NULL;
-    }
+	{
+	  pthread_mutex_unlock (&ffi_trampoline_lock);
+	  free (closure);
+	  return NULL;
+	}
 
       /* Insert the new table at the top of the list */
       table->next = ffi_trampoline_tables;
       if (table->next != NULL)
-    table->next->prev = table;
+	table->next->prev = table;
 
       ffi_trampoline_tables = table;
     }
@@ -374,7 +374,7 @@ ffi_closure_free (void *ptr)
       table->prev = NULL;
       table->next = ffi_trampoline_tables;
       if (ffi_trampoline_tables != NULL)
-    ffi_trampoline_tables->prev = table;
+	ffi_trampoline_tables->prev = table;
 
       ffi_trampoline_tables = table;
     }
@@ -477,7 +477,7 @@ selinux_enabled_check (void)
 }
 
 #define is_selinux_enabled() (selinux_enabled >= 0 ? selinux_enabled \
-                  : (selinux_enabled = selinux_enabled_check ()))
+			      : (selinux_enabled = selinux_enabled_check ()))
 
 #else
 
@@ -599,7 +599,7 @@ open_temp_exec_file_memfd (const char *name)
 
 /* Open a temporary file name, and immediately unlink it.  */
 static int
-open_temp_exec_file_name (char *name, int flags)
+open_temp_exec_file_name (char *name, int flags MAYBE_UNUSED)
 {
   int fd;
 
@@ -681,14 +681,14 @@ open_temp_exec_file_mnt (const char *mounts)
   if (mounts != last_mounts)
     {
       if (last_mntent)
-    endmntent (last_mntent);
+	endmntent (last_mntent);
 
       last_mounts = mounts;
 
       if (mounts)
-    last_mntent = setmntent (mounts, "r");
+	last_mntent = setmntent (mounts, "r");
       else
-    last_mntent = NULL;
+	last_mntent = NULL;
     }
 
   if (!last_mntent)
@@ -701,17 +701,17 @@ open_temp_exec_file_mnt (const char *mounts)
       char buf[MAXPATHLEN * 3];
 
       if (getmntent_r (last_mntent, &mnt, buf, sizeof (buf)) == NULL)
-    return -1;
+	return -1;
 
       if (hasmntopt (&mnt, "ro")
-      || hasmntopt (&mnt, "noexec")
-      || access (mnt.mnt_dir, W_OK))
-    continue;
+	  || hasmntopt (&mnt, "noexec")
+	  || access (mnt.mnt_dir, W_OK))
+	continue;
 
       fd = open_temp_exec_file_dir (mnt.mnt_dir);
 
       if (fd != -1)
-    return fd;
+	return fd;
     }
 }
 #endif /* HAVE_MNTENT */
@@ -754,7 +754,7 @@ open_temp_exec_file_opts_next (void)
   open_temp_exec_file_opts_idx++;
   if (open_temp_exec_file_opts_idx
       == (sizeof (open_temp_exec_file_opts)
-      / sizeof (*open_temp_exec_file_opts)))
+	  / sizeof (*open_temp_exec_file_opts)))
     {
       open_temp_exec_file_opts_idx = 0;
       return 1;
@@ -773,14 +773,14 @@ open_temp_exec_file (void)
   do
     {
       fd = open_temp_exec_file_opts[open_temp_exec_file_opts_idx].func
-    (open_temp_exec_file_opts[open_temp_exec_file_opts_idx].arg);
+	(open_temp_exec_file_opts[open_temp_exec_file_opts_idx].arg);
 
       if (!open_temp_exec_file_opts[open_temp_exec_file_opts_idx].repeat
-      || fd == -1)
-    {
-      if (open_temp_exec_file_opts_next ())
-        break;
-    }
+	  || fd == -1)
+	{
+	  if (open_temp_exec_file_opts_next ())
+	    break;
+	}
     }
   while (fd == -1);
 
@@ -795,9 +795,9 @@ open_temp_exec_file (void)
    Failure to allocate the space will cause SIGBUS to be thrown when
    the mapping is subsequently written to.  */
 static int
-allocate_space (int fd, off_t offset, off_t len)
+allocate_space (int fd, off_t len)
 {
-  static size_t page_size;
+  static long page_size;
 
   /* Obtain system page size. */
   if (!page_size)
@@ -833,26 +833,26 @@ dlmmap_locked (void *start, size_t length, int prot, int flags, off_t offset)
     retry_open:
       execfd = open_temp_exec_file ();
       if (execfd == -1)
-    return MFAIL;
+	return MFAIL;
     }
 
   offset = execsize;
 
-  if (allocate_space (execfd, offset, length))
+  if (allocate_space (execfd, length))
     return MFAIL;
 
   flags &= ~(MAP_PRIVATE | MAP_ANONYMOUS);
   flags |= MAP_SHARED;
 
   ptr = mmap (NULL, length, (prot & ~PROT_WRITE) | PROT_EXEC,
-          flags, execfd, offset);
+	      flags, execfd, offset);
   if (ptr == MFAIL)
     {
       if (!offset)
-    {
-      close (execfd);
-      goto retry_open;
-    }
+	{
+	  close (execfd);
+	  goto retry_open;
+	}
       if (ftruncate (execfd, offset) != 0)
       {
         /* Fixme : Error logs can be added here. Returning an error for
@@ -863,7 +863,7 @@ dlmmap_locked (void *start, size_t length, int prot, int flags, off_t offset)
       return MFAIL;
     }
   else if (!offset
-       && open_temp_exec_file_opts[open_temp_exec_file_opts_idx].repeat)
+	   && open_temp_exec_file_opts[open_temp_exec_file_opts_idx].repeat)
     open_temp_exec_file_opts_next ();
 
   start = mmap (start, length, prot, flags, execfd, offset);
@@ -891,14 +891,14 @@ dlmmap_locked (void *start, size_t length, int prot, int flags, off_t offset)
    Failing that, fall back to dlmmap_locked.  */
 static void *
 dlmmap (void *start, size_t length, int prot,
-    int flags, int fd, off_t offset)
+	int flags, int fd, off_t offset)
 {
   void *ptr;
 
   assert (start == NULL && length % malloc_getpagesize == 0
-      && prot == (PROT_READ | PROT_WRITE)
-      && flags == (MAP_PRIVATE | MAP_ANONYMOUS)
-      && fd == -1 && offset == 0);
+	  && prot == (PROT_READ | PROT_WRITE)
+	  && flags == (MAP_PRIVATE | MAP_ANONYMOUS)
+	  && fd == -1 && offset == 0);
 
   if (execfd == -1 && ffi_tramp_is_supported ())
     {
@@ -927,12 +927,12 @@ dlmmap (void *start, size_t length, int prot,
       ptr = mmap (start, length, prot | PROT_EXEC, flags, fd, offset);
 
       if (ptr != MFAIL || (errno != EPERM && errno != EACCES))
-    /* Cool, no need to mess with separate segments.  */
-    return ptr;
+	/* Cool, no need to mess with separate segments.  */
+	return ptr;
 
       /* If MREMAP_DUP is ever introduced and implemented, try mmap
-     with ((prot & ~PROT_WRITE) | PROT_EXEC) and mremap with
-     MREMAP_DUP and prot at this point.  */
+	 with ((prot & ~PROT_WRITE) | PROT_EXEC) and mremap with
+	 MREMAP_DUP and prot at this point.  */
     }
 
   pthread_mutex_lock (&open_temp_exec_file_mutex);
@@ -960,7 +960,7 @@ dlmunmap (void *start, size_t length)
     {
       int ret = munmap (code, length);
       if (ret)
-    return ret;
+	return ret;
     }
 
   return munmap (start, length);
@@ -974,7 +974,7 @@ segment_holding_code (mstate m, char* addr)
   msegmentptr sp = &m->seg;
   for (;;) {
     if (addr >= add_segment_exec_offset (sp->base, sp)
-    && addr < add_segment_exec_offset (sp->base, sp) + sp->size)
+	&& addr < add_segment_exec_offset (sp->base, sp) + sp->size)
       return sp;
     if ((sp = sp->next) == 0)
       return 0;
@@ -995,23 +995,23 @@ ffi_closure_alloc (size_t size, void **code)
   if (!code)
     return NULL;
 
-  ptr = FFI_CLOSURE_PTR (dlmalloc (size));
+  ptr = dlmalloc (size);
 
   if (ptr)
     {
       msegmentptr seg = segment_holding (gm, ptr);
 
-      *code = add_segment_exec_offset (ptr, seg);
+      *code = FFI_FN (add_segment_exec_offset (ptr, seg));
       if (!ffi_tramp_is_supported ())
         return ptr;
 
       ftramp = ffi_tramp_alloc (0);
       if (ftramp == NULL)
       {
-        dlfree (FFI_RESTORE_PTR (ptr));
+        dlfree (ptr);
         return NULL;
       }
-      *code = ffi_tramp_get_addr (ftramp);
+      *code = FFI_FN (ffi_tramp_get_addr (ftramp));
       ((ffi_closure *) ptr)->ftramp = ftramp;
     }
 
@@ -1052,7 +1052,7 @@ ffi_closure_free (void *ptr)
   if (ffi_tramp_is_supported ())
     ffi_tramp_free (((ffi_closure *) ptr)->ftramp);
 
-  dlfree (FFI_RESTORE_PTR (ptr));
+  dlfree (ptr);
 }
 
 int
@@ -1072,16 +1072,20 @@ ffi_tramp_is_present (void *ptr)
 void *
 ffi_closure_alloc (size_t size, void **code)
 {
+  void *c;
+
   if (!code)
     return NULL;
 
-  return *code = FFI_CLOSURE_PTR (malloc (size));
+  c = malloc (size);
+  *code = FFI_FN (c);
+  return c;
 }
 
 void
 ffi_closure_free (void *ptr)
 {
-  free (FFI_RESTORE_PTR (ptr));
+  free (ptr);
 }
 
 void *
@@ -1100,3 +1104,4 @@ ffi_tramp_is_present (__attribute__((unused)) void *ptr)
 #endif /* FFI_CLOSURES */
 
 #endif /* NetBSD with PROT_MPROTECT */
+#endif /* __EMSCRIPTEN__ */

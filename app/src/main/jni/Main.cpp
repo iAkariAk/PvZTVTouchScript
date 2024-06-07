@@ -16,7 +16,8 @@
 #define targetLibName "libGameMain.so"
 
 #include "HookGame/HookGame.cpp"
-
+#include "Fairy/FUtils.h"
+#include "Fairy/Script/ScriptInterface.h"
 
 //这里是本模块在加载时执行的程序入口
 //理论上，java层已经指定了加载顺序是先libGameMain.so，后libHomura.so。所以本模块加载时，libGameMain.so一定已经加载完成了。
@@ -24,7 +25,7 @@ __attribute__((constructor))
 void lib_main() {
     //Patch需要手动获取lib基址，因而需要判断是否能成功手动获取基址，成功了才继续Patch。
     //部分安卓4设备就无法获取到基址，暂时不清楚什么原因。但是仅影响Patch而不影响Hook，影响不大。
-
+    fairy::utils::Init();
     //Hook
     GetFunctionAddr();
     CallHook();
@@ -46,10 +47,37 @@ void lib_main() {
     }
 }
 
+JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+    JNIEnv *env;
+    if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        return JNI_ERR;
+    }
+    fairy::utils::InitJni(vm);
+    int rc;
+    jclass fairyScriptClass = env->FindClass("com/fairy/tv/script/FairyScript");
+    if (fairyScriptClass == nullptr) return JNI_ERR;
+    static const JNINativeMethod fairyScriptMethods[] = {
+            {"execute",     "(Ljava/lang/String;Ljava/util/function/Consumer;)V", reinterpret_cast<void *>(fairy::script::Execute)},
+            {"executeFile", "(Ljava/lang/String;Ljava/util/function/Consumer;)V", reinterpret_cast<void *>(fairy::script::ExecuteFile)},
+    };
+    rc = env->RegisterNatives(fairyScriptClass, fairyScriptMethods, ARRAY_SIZE(fairyScriptMethods));
+    if (rc != JNI_OK) {
+        return rc;
+    }
+    return JNI_VERSION_1_6;
+}
 
-//jint JNI_OnLoad(JavaVM *vm, void *reserved) {
-//    return JNI_VERSION_1_6;
-//}
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_fairy_tv_FairyNative_setAssetManager(JNIEnv *env, jclass thiz, jobject manager) {
+    fairy::utils::gAAssetManager = AAssetManager_fromJava(env, manager);
+}
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_fairy_tv_FairyNative_setCatchDir(JNIEnv *env, jclass thiz, jstring path) {
+    fairy::utils::gCacheDir = fairy::utils::JStringToString(env, path);
+}
+
 
 extern "C"
 JNIEXPORT void JNICALL

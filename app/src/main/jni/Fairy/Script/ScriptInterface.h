@@ -6,13 +6,8 @@
 #define PVZFREE_FAIRY_ATTRIBUTE_SCRIPTINTERFACE_H
 
 #include <fstream>
-#include "Utils.h"
+#include <jni.h>
 #include "lua.hpp"
-#include "EA/string.h"
-#include "SexyAppFramework/SexyAppBase.h"
-#include "SexyAppFramework/Common.h"
-#include "Lawn/Board.h"
-#include "ffi.h"
 
 extern "C" {
 #include "lua_cjson.h"
@@ -44,9 +39,9 @@ namespace fairy::script {
 
     bool Init();
 
-    void Execute(JNIEnv *env, jobject thiz, jstring codeStr, jobject onResult);
+    void Execute(JNIEnv *env, jclass thiz, jstring codeStr, jobject onResult);
 
-    void ExecuteFile(JNIEnv *env, jobject thiz, jstring pathStr, jobject onResult);
+    void ExecuteFile(JNIEnv *env, jclass thiz, jstring pathStr, jobject onResult);
 }
 
 #endif //PVZFREE_FAIRY_ATTRIBUTE_SCRIPTINTERFACE_H

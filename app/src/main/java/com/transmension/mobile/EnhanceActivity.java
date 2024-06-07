@@ -1,9 +1,11 @@
 package com.transmension.mobile;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.hardware.SensorManager;
@@ -21,13 +23,27 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.ScrollView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.support.CkHomuraMenu;
+import com.fairy.tv.FairyNative;
+import com.fairy.tv.floating.FloatingController;
+import com.fairy.tv.floating.FloatingLauncher;
+import com.fairy.tv.floating.weight.FloatingDraggableAreas;
+import com.fairy.tv.script.FairyScript;
 import com.trans.pvztv.R;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -38,6 +54,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -474,6 +492,7 @@ public class EnhanceActivity extends MainActivity {
         //读取设置中的“重型武器重力感应”设置项，决定是否开启重力感应
         heavyWeaponAccel = sharedPreferences.getBoolean("heavyWeaponAccel", false);
     }
+
     private void addVisibilityButton(SharedPreferences sharedPreferences) {
         if (!sharedPreferences.getBoolean("useInGameKeyboard", true)) {
             return;
@@ -563,11 +582,14 @@ public class EnhanceActivity extends MainActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("data", 0);
 
         loadPreferencesFromAssetsFile(preferences, sharedPreferences);
-
+        registerFloating();
         super.onCreate(savedInstanceState);
 
         //Hook，启动！
         System.loadLibrary("Homura");
+
+        initFairy();
+
 
         loadGameSettings(sharedPreferences);
         launchFileObserver(sharedPreferences);
@@ -592,6 +614,61 @@ public class EnhanceActivity extends MainActivity {
         };
 
 
+    }
+
+    private void registerFloating() {
+        var container = new FrameLayout(this);
+        var controller = new FloatingController(new WeakReference<>(this), container, FloatingController.defaultLayoutParams());
+        var btn = new Button(this);
+        btn.setBackgroundColor(Color.RED);
+        btn.setText("LuaConsole");
+        FloatingDraggableAreas.asFloatingDraggableArea(btn, controller);
+
+        btn.setOnClickListener(v -> {
+            var consoleLayout = new LinearLayout(this);
+            consoleLayout.setBackgroundColor(0xFF28292E);
+            consoleLayout.setOrientation(LinearLayout.VERTICAL);
+            var inputEdit = new EditText(this);
+            inputEdit.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 200));
+            var executeBtn = new Button(this);
+            executeBtn.setText("execute");
+            executeBtn.setBackgroundColor(0xFF3574F0);
+            executeBtn.setOnClickListener(v2 -> {
+                FairyScript.execute(inputEdit.getText().toString(), result -> {
+                    Toast.makeText(this, result, Toast.LENGTH_LONG).show();
+                });
+            });
+
+            var messagesAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_activated_1);
+            var messagesView = new ListView(this);
+            messagesView.setDividerHeight(0);
+            messagesView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 400));
+            messagesView.setAdapter(messagesAdapter);
+            for (int i = 0; i < 10; i++) {
+                messagesAdapter.add("HIHI");
+            }
+
+            consoleLayout.addView(messagesView);
+            consoleLayout.addView(inputEdit);
+            consoleLayout.addView(executeBtn);
+
+            var scrollView = new ScrollView(this);
+            scrollView.addView(consoleLayout);
+            new AlertDialog.Builder(this)
+                    .setView(scrollView)
+                    .create()
+                    .show();
+        });
+        container.addView(btn);
+
+
+        var callbacks = new FloatingLauncher(controller);
+        getApplication().registerActivityLifecycleCallbacks(callbacks);
+    }
+
+    private void initFairy() {
+        FairyNative.setAssetManager(getAssets());
+        FairyNative.setCatchDir(getCacheDir().getAbsolutePath());
     }
 
     //用于按下、抬起按钮时的缩放动画
@@ -727,6 +804,7 @@ public class EnhanceActivity extends MainActivity {
     public static native void nativeEnableNewOptionsDialog();//使用新的暂停菜单。
 
     public static native void nativeSetHeavyWeaponAngle(int i);//设定重型武器发射角度，i的值可以为0~180
+
     public static native void native1PButtonDown(int code);//1P按下按键。用于对战和结盟中操作1P种植
 
     public static native void native2PButtonDown(int code);//2P按下按键。用于对战和结盟中操作2P种植
@@ -734,6 +812,7 @@ public class EnhanceActivity extends MainActivity {
     public static native void nativeSwitchTwoPlayerMode(boolean isOn);
 
     public static native boolean nativeIsInGame();
+
     public static native void nativeGaoJiPause(boolean enable);//高级暂停
 
     public static native boolean nativeIsGaoJiPaused();//高级暂停状态
@@ -749,13 +828,15 @@ public class EnhanceActivity extends MainActivity {
     public static native void nativeEnableImitater();
 
     public static native void nativeDisableTrashBinZombie();
-    public static native void nativeSendSecondTouch(int x,int y,int action);
+
+    public static native void nativeSendSecondTouch(int x, int y, int action);
 
     public static native void nativeShowHouse();//显示房屋。
 
     public static native void nativeUseNewCobCannon();//新版加农炮光标。
 
     public static native void nativeAutoFixPosition();
+
     public static native void nativeSeedBankPin();
 
     public static native void nativeDynamicPreview();
@@ -770,7 +851,7 @@ public class EnhanceActivity extends MainActivity {
 
     final float width = 1280, height = 720, boardMarginX = 240, boardMarginY = 60;
 
-    private float boardWidgetLeft,boardWidgetRight,boardWidgetTop,boardWidgetBottom;
+    private float boardWidgetLeft, boardWidgetRight, boardWidgetTop, boardWidgetBottom;
 
     public void refreshNativeViewBorders(View view) {
 
@@ -832,6 +913,7 @@ public class EnhanceActivity extends MainActivity {
         keyMap.put(sharedPreferences.getInt("P2LEFT", KeyEvent.KEYCODE_A), 18 + 256);
         keyMap.put(sharedPreferences.getInt("P2RIGHT", KeyEvent.KEYCODE_D), 19 + 256);
     }
+
     private final HashMap<Integer, Integer> keyMap = new HashMap<>();
     private int keyCodePause = 0, keyCodeSwitchTwoPlayerMode = 0;
     private boolean useSpecialPause = false;
@@ -887,21 +969,21 @@ public class EnhanceActivity extends MainActivity {
                                 } else if (mSecondTouchId == -1) {
                                     final float x = motionEvent.getX(pointerIndex);
                                     final float y = motionEvent.getY(pointerIndex);
-                                    if (x > boardWidgetLeft && x < boardWidgetRight && y > boardWidgetTop && y < boardWidgetBottom){
+                                    if (x > boardWidgetLeft && x < boardWidgetRight && y > boardWidgetTop && y < boardWidgetBottom) {
                                         mSecondTouchId = pointerId;
-                                        nativeSendSecondTouch(Math.round((x - boardWidgetLeft)/gameViewWidth),Math.round((y-boardWidgetTop)/gameViewHeight),0);
+                                        nativeSendSecondTouch(Math.round((x - boardWidgetLeft) / gameViewWidth), Math.round((y - boardWidgetTop) / gameViewHeight), 0);
                                     }
                                 }
                                 break;
                             case MotionEvent.ACTION_MOVE:
-                                if (mFirstTouchId != -1){
+                                if (mFirstTouchId != -1) {
                                     sendMotionEventNative(motionEvent);
                                 }
-                                if (mSecondTouchId != -1){
+                                if (mSecondTouchId != -1) {
                                     final int secondPointerIndex = motionEvent.findPointerIndex(mSecondTouchId);
                                     final float x1 = motionEvent.getX(secondPointerIndex);
                                     final float y1 = motionEvent.getY(secondPointerIndex);
-                                    nativeSendSecondTouch(Math.round((x1 - boardWidgetLeft)/gameViewWidth),Math.round((y1-boardWidgetTop)/gameViewHeight),1);
+                                    nativeSendSecondTouch(Math.round((x1 - boardWidgetLeft) / gameViewWidth), Math.round((y1 - boardWidgetTop) / gameViewHeight), 1);
                                 }
                                 break;
 
@@ -918,7 +1000,7 @@ public class EnhanceActivity extends MainActivity {
                                     final int secondPointerIndex = motionEvent.findPointerIndex(mSecondTouchId);
                                     final float x1 = motionEvent.getX(secondPointerIndex);
                                     final float y1 = motionEvent.getY(secondPointerIndex);
-                                    nativeSendSecondTouch(Math.round((x1 - boardWidgetLeft)/gameViewWidth),Math.round((y1-boardWidgetTop)/gameViewHeight),2);
+                                    nativeSendSecondTouch(Math.round((x1 - boardWidgetLeft) / gameViewWidth), Math.round((y1 - boardWidgetTop) / gameViewHeight), 2);
                                     mSecondTouchId = -1;
                                 }
                                 break;
@@ -1008,7 +1090,8 @@ public class EnhanceActivity extends MainActivity {
     @Override
     public void onDestroy() {
         if (isFileObserverLaunched) fileObserver.stopWatching();
-        if (isAddonWindowLoaded && visibilityWindow != null) mWindowManager.removeViewImmediate(visibilityWindow);
+        if (isAddonWindowLoaded && visibilityWindow != null)
+            mWindowManager.removeViewImmediate(visibilityWindow);
         if (heavyWeaponAccel) mOrientationListener.disable();
         super.onDestroy();
     }

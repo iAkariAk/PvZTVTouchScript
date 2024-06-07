@@ -12,9 +12,9 @@
 typedef unsigned long DWORD;
 static uintptr_t libBase;
 
-bool libLoaded = false;
+inline bool libLoaded = false;
 
-DWORD findLibrary(const char *library) {
+inline DWORD findLibrary(const char *library) {
     char filename[0xFF] = {0},
             buffer[1024] = {0};
     FILE *fp = NULL;
@@ -44,7 +44,7 @@ DWORD findLibrary(const char *library) {
     return address;
 }
 
-DWORD getAbsoluteAddress(const char *libraryName, DWORD relativeAddr) {
+inline DWORD getAbsoluteAddress(const char *libraryName, DWORD relativeAddr) {
     libBase = findLibrary(libraryName);
     if (libBase == 0)
         return 0;
@@ -52,11 +52,11 @@ DWORD getAbsoluteAddress(const char *libraryName, DWORD relativeAddr) {
 }
 
 
-jboolean isGameLibLoaded(JNIEnv *env, jobject thiz) {
+inline jboolean isGameLibLoaded(JNIEnv *env, jobject thiz) {
     return libLoaded;
 }
 
-bool isLibraryLoaded(const char *libraryName) {
+inline bool isLibraryLoaded(const char *libraryName) {
     //libLoaded = true;
     char line[512] = {0};
     FILE *fp = fopen("/proc/self/maps", "rt");
@@ -73,7 +73,7 @@ bool isLibraryLoaded(const char *libraryName) {
     return false;
 }
 
-uintptr_t string2Offset(const char *c) {
+inline uintptr_t string2Offset(const char *c) {
     int base = 16;
     // See if this function catches all possibilities.
     // If it doesn't, the function would have to be amended

@@ -43,14 +43,16 @@ extern "C" {
 # if HAVE_ALLOCA_H
 #  include <alloca.h>
 # else
-/* mingw64 defines this already in malloc.h. */
+  /* mingw64 defines this already in malloc.h. */
 #  ifndef alloca
 #    define alloca __builtin_alloca
 #  endif
 # endif
 # define MAYBE_UNUSED __attribute__((__unused__))
+# define NORETURN __attribute__((__noreturn__))
 #else
 # define MAYBE_UNUSED
+# define NORETURN
 # if HAVE_ALLOCA_H
 #  include <alloca.h>
 # else
@@ -61,9 +63,7 @@ extern "C" {
 #    ifdef _MSC_VER
 #     define alloca _alloca
 #    else
-
-char *alloca();
-
+char *alloca ();
 #   endif
 #  endif
 # endif
@@ -84,9 +84,9 @@ char *alloca();
 #endif
 
 #ifdef FFI_DEBUG
-void ffi_assert(char *expr, char *file, int line);
+NORETURN void ffi_assert(const char *expr, const char *file, int line);
 void ffi_stop_here(void);
-void ffi_type_test(ffi_type *a, char *file, int line);
+void ffi_type_test(ffi_type *a, const char *file, int line);
 
 #define FFI_ASSERT(x) ((x) ? (void)0 : ffi_assert(#x, __FILE__,__LINE__))
 #define FFI_ASSERT_AT(x, f, l) ((x) ? 0 : ffi_assert(#x, (f), (l)))
@@ -104,9 +104,8 @@ void ffi_type_test(ffi_type *a, char *file, int line);
 
 /* Perform machine dependent cif processing */
 ffi_status ffi_prep_cif_machdep(ffi_cif *cif);
-
 ffi_status ffi_prep_cif_machdep_var(ffi_cif *cif,
-                                    unsigned int nfixedargs, unsigned int ntotalargs);
+	 unsigned int nfixedargs, unsigned int ntotalargs);
 
 
 #if HAVE_LONG_DOUBLE_VARIANT
@@ -116,30 +115,31 @@ void ffi_prep_types (ffi_abi abi);
 
 /* Used internally, but overridden by some architectures */
 ffi_status ffi_prep_cif_core(ffi_cif *cif,
-                             ffi_abi abi,
-                             unsigned int isvariadic,
-                             unsigned int nfixedargs,
-                             unsigned int ntotalargs,
-                             ffi_type *rtype,
-                             ffi_type **atypes);
+			     ffi_abi abi,
+			     unsigned int isvariadic,
+			     unsigned int nfixedargs,
+			     unsigned int ntotalargs,
+			     ffi_type *rtype,
+			     ffi_type **atypes);
 
 /* Translate a data pointer to a code pointer.  Needed for closures on
    some targets.  */
-void *ffi_data_to_code_pointer(void *data)
-
-FFI_HIDDEN;
+void *ffi_data_to_code_pointer (void *data) FFI_HIDDEN;
 
 /* The arch code calls this to determine if a given closure has a
    static trampoline. */
-int ffi_tramp_is_present(void *closure)
+int ffi_tramp_is_present (void *closure) FFI_HIDDEN;
 
-FFI_HIDDEN;
+/* Return a file descriptor of a temporary zero-sized file in a
+   writable and executable filesystem. */
+int open_temp_exec_file(void) FFI_HIDDEN;
 
 /* Extended cif, used in callback from assembly routine */
-typedef struct {
-    ffi_cif *cif;
-    void *rvalue;
-    void **avalue;
+typedef struct
+{
+  ffi_cif *cif;
+  void *rvalue;
+  void **avalue;
 } extended_cif;
 
 /* Terse sized type definitions.  */
@@ -160,13 +160,13 @@ typedef int64_t  SINT64;
 # endif
 #else
 typedef unsigned int UINT8  __attribute__((__mode__(__QI__)));
-typedef signed int SINT8  __attribute__((__mode__(__QI__)));
+typedef signed int   SINT8  __attribute__((__mode__(__QI__)));
 typedef unsigned int UINT16 __attribute__((__mode__(__HI__)));
-typedef signed int SINT16 __attribute__((__mode__(__HI__)));
+typedef signed int   SINT16 __attribute__((__mode__(__HI__)));
 typedef unsigned int UINT32 __attribute__((__mode__(__SI__)));
-typedef signed int SINT32 __attribute__((__mode__(__SI__)));
+typedef signed int   SINT32 __attribute__((__mode__(__SI__)));
 typedef unsigned int UINT64 __attribute__((__mode__(__DI__)));
-typedef signed int SINT64 __attribute__((__mode__(__DI__)));
+typedef signed int   SINT64 __attribute__((__mode__(__DI__)));
 #endif
 
 typedef float FLOAT32;

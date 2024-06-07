@@ -1,6 +1,7 @@
 /* -----------------------------------------------------------------*-C-*-
-   libffi 3.3-rc0 - Copyright (c) 2011, 2014 Anthony Green
-                    - Copyright (c) 1996-2003, 2007, 2008 Red Hat, Inc.
+   libffi @VERSION@
+     - Copyright (c) 2011, 2014, 2019, 2021, 2022, 2024 Anthony Green
+     - Copyright (c) 1996-2003, 2007, 2008 Red Hat, Inc.
 
    Permission is hereby granted, free of charge, to any person
    obtaining a copy of this software and associated documentation
@@ -49,11 +50,36 @@ extern "C" {
 #endif
 
 /* Specify which architecture libffi is configured for. */
-#ifndef AARCH64
-#define AARCH64
+#ifndef @TARGET@
+#define @TARGET@
 #endif
 
 /* ---- System configuration information --------------------------------- */
+
+/* If these change, update src/mips/ffitarget.h. */
+#define FFI_TYPE_VOID       0
+#define FFI_TYPE_INT        1
+#define FFI_TYPE_FLOAT      2
+#define FFI_TYPE_DOUBLE     3
+#if @HAVE_LONG_DOUBLE@
+#define FFI_TYPE_LONGDOUBLE 4
+#else
+#define FFI_TYPE_LONGDOUBLE FFI_TYPE_DOUBLE
+#endif
+#define FFI_TYPE_UINT8      5
+#define FFI_TYPE_SINT8      6
+#define FFI_TYPE_UINT16     7
+#define FFI_TYPE_SINT16     8
+#define FFI_TYPE_UINT32     9
+#define FFI_TYPE_SINT32     10
+#define FFI_TYPE_UINT64     11
+#define FFI_TYPE_SINT64     12
+#define FFI_TYPE_STRUCT     13
+#define FFI_TYPE_POINTER    14
+#define FFI_TYPE_COMPLEX    15
+
+/* This should always refer to the last type code (for sanity checks).  */
+#define FFI_TYPE_LAST       FFI_TYPE_COMPLEX
 
 #include <ffitarget.h>
 
@@ -100,11 +126,12 @@ extern "C" {
 /* The closure code assumes that this works on pointers, i.e. a size_t
    can hold a pointer.  */
 
-typedef struct _ffi_type {
-    size_t size;
-    unsigned short alignment;
-    unsigned short type;
-    struct _ffi_type **elements;
+typedef struct _ffi_type
+{
+  size_t size;
+  unsigned short alignment;
+  unsigned short type;
+  struct _ffi_type **elements;
 } ffi_type;
 
 /* Need minimal decorations for DLLs to work on Windows.  GCC has
@@ -113,13 +140,11 @@ typedef struct _ffi_type {
    when using the static version of the library.
    Besides, as a workaround, they can define FFI_BUILDING if they
    *know* they are going to link with the static library.  */
-#if defined _MSC_VER
+#if defined _MSC_VER && !defined(FFI_STATIC_BUILD)
 # if defined FFI_BUILDING_DLL /* Building libffi.DLL with msvcc.sh */
 #  define FFI_API __declspec(dllexport)
-# elif !defined FFI_BUILDING  /* Importing libffi.DLL */
+# else  /* Importing libffi.DLL */
 #  define FFI_API __declspec(dllimport)
-# else                        /* Building/linking static library */
-#  define FFI_API
 # endif
 #else
 # define FFI_API
@@ -138,7 +163,7 @@ typedef struct _ffi_type {
 # define ffi_type_uchar                ffi_type_uint8
 # define ffi_type_schar                ffi_type_sint8
 #else
-#error "char size not supported"
+ #error "char size not supported"
 #endif
 
 #if SHRT_MAX == 32767
@@ -148,7 +173,7 @@ typedef struct _ffi_type {
 # define ffi_type_ushort       ffi_type_uint32
 # define ffi_type_sshort       ffi_type_sint32
 #else
-#error "short size not supported"
+ #error "short size not supported"
 #endif
 
 #if INT_MAX == 32767
@@ -161,15 +186,15 @@ typedef struct _ffi_type {
 # define ffi_type_uint         ffi_type_uint64
 # define ffi_type_sint         ffi_type_sint64
 #else
-#error "int size not supported"
+ #error "int size not supported"
 #endif
 
 #if LONG_MAX == 2147483647
 # if FFI_LONG_LONG_MAX != FFI_64_BIT_MAX
-#error "no 64-bit data type supported"
+ #error "no 64-bit data type supported"
 # endif
 #elif LONG_MAX != FFI_64_BIT_MAX
-#error "long size not supported"
+ #error "long size not supported"
 #endif
 
 #if LONG_MAX == 2147483647
@@ -179,7 +204,7 @@ typedef struct _ffi_type {
 # define ffi_type_ulong        ffi_type_uint64
 # define ffi_type_slong        ffi_type_sint64
 #else
-#error "long size not supported"
+ #error "long size not supported"
 #endif
 
 /* These are defined in types.c.  */
@@ -195,41 +220,31 @@ FFI_EXTERN ffi_type ffi_type_sint64;
 FFI_EXTERN ffi_type ffi_type_float;
 FFI_EXTERN ffi_type ffi_type_double;
 FFI_EXTERN ffi_type ffi_type_pointer;
-
-#ifndef _M_ARM64
 FFI_EXTERN ffi_type ffi_type_longdouble;
-#else
-#define ffi_type_longdouble ffi_type_double
-#endif
 
 #ifdef FFI_TARGET_HAS_COMPLEX_TYPE
 FFI_EXTERN ffi_type ffi_type_complex_float;
 FFI_EXTERN ffi_type ffi_type_complex_double;
-#if 1
 FFI_EXTERN ffi_type ffi_type_complex_longdouble;
-#else
-#define ffi_type_complex_longdouble ffi_type_complex_double
-#endif
 #endif
 #endif /* LIBFFI_HIDE_BASIC_TYPES */
 
 typedef enum {
-    FFI_OK = 0,
-    FFI_BAD_TYPEDEF,
-    FFI_BAD_ABI,
-    FFI_BAD_ARGTYPE
+  FFI_OK = 0,
+  FFI_BAD_TYPEDEF,
+  FFI_BAD_ABI,
+  FFI_BAD_ARGTYPE
 } ffi_status;
 
-
 typedef struct {
-    ffi_abi abi;
-    unsigned nargs;
-    ffi_type **arg_types;
-    ffi_type *rtype;
-    unsigned bytes;
-    unsigned flags;
+  ffi_abi abi;
+  unsigned nargs;
+  ffi_type **arg_types;
+  ffi_type *rtype;
+  unsigned bytes;
+  unsigned flags;
 #ifdef FFI_EXTRA_CIF_FIELDS
-    FFI_EXTRA_CIF_FIELDS;
+  FFI_EXTRA_CIF_FIELDS;
 #endif
 } ffi_cif;
 
@@ -248,11 +263,11 @@ typedef struct {
 #endif
 
 typedef union {
-    ffi_sarg sint;
-    ffi_arg uint;
-    float flt;
-    char data[FFI_SIZEOF_ARG];
-    void *ptr;
+  ffi_sarg  sint;
+  ffi_arg   uint;
+  float	    flt;
+  char      data[FFI_SIZEOF_ARG];
+  void*     ptr;
 } ffi_raw;
 
 #if FFI_SIZEOF_JAVA_RAW == 4 && FFI_SIZEOF_ARG == 8
@@ -271,35 +286,33 @@ typedef ffi_raw ffi_java_raw;
 
 
 FFI_API
-void ffi_raw_call(ffi_cif *cif,
-                  void (*fn)(void),
-                  void *rvalue,
-                  ffi_raw *avalue);
+void ffi_raw_call (ffi_cif *cif,
+		   void (*fn)(void),
+		   void *rvalue,
+		   ffi_raw *avalue);
 
-FFI_API void ffi_ptrarray_to_raw(ffi_cif *cif, void **args, ffi_raw *raw);
-
-FFI_API void ffi_raw_to_ptrarray(ffi_cif *cif, ffi_raw *raw, void **args);
-
-FFI_API size_t ffi_raw_size(ffi_cif *cif);
+FFI_API void ffi_ptrarray_to_raw (ffi_cif *cif, void **args, ffi_raw *raw);
+FFI_API void ffi_raw_to_ptrarray (ffi_cif *cif, ffi_raw *raw, void **args);
+FFI_API size_t ffi_raw_size (ffi_cif *cif);
 
 /* This is analogous to the raw API, except it uses Java parameter
    packing, even on 64-bit machines.  I.e. on 64-bit machines longs
    and doubles are followed by an empty 64-bit word.  */
 
+#if !FFI_NATIVE_RAW_API
 FFI_API
-void ffi_java_raw_call(ffi_cif *cif,
-                       void (*fn)(void),
-                       void *rvalue,
-                       ffi_java_raw *avalue);
+void ffi_java_raw_call (ffi_cif *cif,
+			void (*fn)(void),
+			void *rvalue,
+			ffi_java_raw *avalue) __attribute__((deprecated));
+#endif
 
 FFI_API
-void ffi_java_ptrarray_to_raw(ffi_cif *cif, void **args, ffi_java_raw *raw);
-
+void ffi_java_ptrarray_to_raw (ffi_cif *cif, void **args, ffi_java_raw *raw) __attribute__((deprecated));
 FFI_API
-void ffi_java_raw_to_ptrarray(ffi_cif *cif, ffi_java_raw *raw, void **args);
-
+void ffi_java_raw_to_ptrarray (ffi_cif *cif, ffi_java_raw *raw, void **args) __attribute__((deprecated));
 FFI_API
-size_t ffi_java_raw_size(ffi_cif *cif);
+size_t ffi_java_raw_size (ffi_cif *cif) __attribute__((deprecated));
 
 /* ---- Definitions for closures ----------------------------------------- */
 
@@ -309,15 +322,21 @@ size_t ffi_java_raw_size(ffi_cif *cif);
 __declspec(align(8))
 #endif
 typedef struct {
-#if 0
+#if @FFI_EXEC_TRAMPOLINE_TABLE@
   void *trampoline_table;
   void *trampoline_table_entry;
 #else
-  char tramp[FFI_TRAMPOLINE_SIZE];
+  union {
+    char tramp[FFI_TRAMPOLINE_SIZE];
+    void *ftramp;
+  };
 #endif
   ffi_cif   *cif;
   void     (*fun)(ffi_cif*,void*,void**,void*);
   void      *user_data;
+#if defined(_MSC_VER) && defined(_M_IX86)
+  void      *padding;
+#endif
 } ffi_closure
 #ifdef __GNUC__
     __attribute__((aligned (8)))
@@ -335,9 +354,9 @@ FFI_API void ffi_closure_free (void *);
 
 FFI_API ffi_status
 ffi_prep_closure (ffi_closure*,
-          ffi_cif *,
-          void (*fun)(ffi_cif*,void*,void**,void*),
-          void *user_data)
+		  ffi_cif *,
+		  void (*fun)(ffi_cif*,void*,void**,void*),
+		  void *user_data)
 #if defined(__GNUC__) && (((__GNUC__ * 100) + __GNUC_MINOR__) >= 405)
   __attribute__((deprecated ("use ffi_prep_closure_loc instead")))
 #elif defined(__GNUC__) && __GNUC__ >= 3
@@ -347,16 +366,16 @@ ffi_prep_closure (ffi_closure*,
 
 FFI_API ffi_status
 ffi_prep_closure_loc (ffi_closure*,
-              ffi_cif *,
-              void (*fun)(ffi_cif*,void*,void**,void*),
-              void *user_data,
-              void*codeloc);
+		      ffi_cif *,
+		      void (*fun)(ffi_cif*,void*,void**,void*),
+		      void *user_data,
+		      void *codeloc);
 
 #ifdef __sgi
 # pragma pack 8
 #endif
 typedef struct {
-#if 0
+#if @FFI_EXEC_TRAMPOLINE_TABLE@
   void *trampoline_table;
   void *trampoline_table_entry;
 #else
@@ -381,7 +400,7 @@ typedef struct {
 } ffi_raw_closure;
 
 typedef struct {
-#if 0
+#if @FFI_EXEC_TRAMPOLINE_TABLE@
   void *trampoline_table;
   void *trampoline_table_entry;
 #else
@@ -408,33 +427,35 @@ typedef struct {
 
 FFI_API ffi_status
 ffi_prep_raw_closure (ffi_raw_closure*,
-              ffi_cif *cif,
-              void (*fun)(ffi_cif*,void*,ffi_raw*,void*),
-              void *user_data);
+		      ffi_cif *cif,
+		      void (*fun)(ffi_cif*,void*,ffi_raw*,void*),
+		      void *user_data);
 
 FFI_API ffi_status
 ffi_prep_raw_closure_loc (ffi_raw_closure*,
-              ffi_cif *cif,
-              void (*fun)(ffi_cif*,void*,ffi_raw*,void*),
-              void *user_data,
-              void *codeloc);
+			  ffi_cif *cif,
+			  void (*fun)(ffi_cif*,void*,ffi_raw*,void*),
+			  void *user_data,
+			  void *codeloc);
 
+#if !FFI_NATIVE_RAW_API
 FFI_API ffi_status
 ffi_prep_java_raw_closure (ffi_java_raw_closure*,
-                   ffi_cif *cif,
-                   void (*fun)(ffi_cif*,void*,ffi_java_raw*,void*),
-                   void *user_data);
+		           ffi_cif *cif,
+		           void (*fun)(ffi_cif*,void*,ffi_java_raw*,void*),
+		           void *user_data) __attribute__((deprecated));
 
 FFI_API ffi_status
 ffi_prep_java_raw_closure_loc (ffi_java_raw_closure*,
-                   ffi_cif *cif,
-                   void (*fun)(ffi_cif*,void*,ffi_java_raw*,void*),
-                   void *user_data,
-                   void *codeloc);
+			       ffi_cif *cif,
+			       void (*fun)(ffi_cif*,void*,ffi_java_raw*,void*),
+			       void *user_data,
+			       void *codeloc) __attribute__((deprecated));
+#endif
 
 #endif /* FFI_CLOSURES */
 
-#if FFI_GO_CLOSURES
+#ifdef FFI_GO_CLOSURES
 
 typedef struct {
   void      *tramp;
@@ -443,10 +464,10 @@ typedef struct {
 } ffi_go_closure;
 
 FFI_API ffi_status ffi_prep_go_closure (ffi_go_closure*, ffi_cif *,
-                void (*fun)(ffi_cif*,void*,void**,void*));
+				void (*fun)(ffi_cif*,void*,void**,void*));
 
 FFI_API void ffi_call_go (ffi_cif *cif, void (*fn)(void), void *rvalue,
-          void **avalue, void *closure);
+		  void **avalue, void *closure);
 
 #endif /* FFI_GO_CLOSURES */
 
@@ -454,60 +475,41 @@ FFI_API void ffi_call_go (ffi_cif *cif, void (*fn)(void), void *rvalue,
 
 FFI_API
 ffi_status ffi_prep_cif(ffi_cif *cif,
-                        ffi_abi abi,
-                        unsigned int nargs,
-                        ffi_type *rtype,
-                        ffi_type **atypes);
+			ffi_abi abi,
+			unsigned int nargs,
+			ffi_type *rtype,
+			ffi_type **atypes);
 
 FFI_API
 ffi_status ffi_prep_cif_var(ffi_cif *cif,
-                            ffi_abi abi,
-                            unsigned int nfixedargs,
-                            unsigned int ntotalargs,
-                            ffi_type *rtype,
-                            ffi_type **atypes);
+			    ffi_abi abi,
+			    unsigned int nfixedargs,
+			    unsigned int ntotalargs,
+			    ffi_type *rtype,
+			    ffi_type **atypes);
 
 FFI_API
 void ffi_call(ffi_cif *cif,
-              void (*fn)(void),
-              void *rvalue,
-              void **avalue);
+	      void (*fn)(void),
+	      void *rvalue,
+	      void **avalue);
 
 FFI_API
-ffi_status ffi_get_struct_offsets(ffi_abi abi, ffi_type *struct_type,
-                                  size_t *offsets);
+ffi_status ffi_get_struct_offsets (ffi_abi abi, ffi_type *struct_type,
+				   size_t *offsets);
 
-/* Useful for eliminating compiler warnings.  */
+/* Convert between closure and function pointers.  */
+#if defined(PA_LINUX) || defined(PA_HPUX)
+#define FFI_FN(f) ((void (*)(void))((unsigned int)(f) | 2))
+#define FFI_CL(f) ((void *)((unsigned int)(f) & ~3))
+#else
 #define FFI_FN(f) ((void (*)(void))f)
+#define FFI_CL(f) ((void *)(f))
+#endif
 
 /* ---- Definitions shared with assembly code ---------------------------- */
 
 #endif
-
-/* If these change, update src/mips/ffitarget.h. */
-#define FFI_TYPE_VOID       0
-#define FFI_TYPE_INT        1
-#define FFI_TYPE_FLOAT      2
-#define FFI_TYPE_DOUBLE     3
-#ifndef _M_ARM64
-#define FFI_TYPE_LONGDOUBLE 4
-#else
-#define FFI_TYPE_LONGDOUBLE FFI_TYPE_DOUBLE
-#endif
-#define FFI_TYPE_UINT8      5
-#define FFI_TYPE_SINT8      6
-#define FFI_TYPE_UINT16     7
-#define FFI_TYPE_SINT16     8
-#define FFI_TYPE_UINT32     9
-#define FFI_TYPE_SINT32     10
-#define FFI_TYPE_UINT64     11
-#define FFI_TYPE_SINT64     12
-#define FFI_TYPE_STRUCT     13
-#define FFI_TYPE_POINTER    14
-#define FFI_TYPE_COMPLEX    15
-/* This should always refer to the last type code (for sanity checks).  */
-#define FFI_TYPE_LAST   FFI_TYPE_COMPLEX
-
 
 #ifdef __cplusplus
 }

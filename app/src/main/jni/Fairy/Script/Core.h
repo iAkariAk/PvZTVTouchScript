@@ -7,10 +7,6 @@
 
 #include "Utils.h"
 #include "lua.hpp"
-#include "EA/string.h"
-#include "SexyAppFramework/SexyAppBase.h"
-#include "SexyAppFramework/Common.h"
-#include "Lawn/Board.h"
 
 namespace fairy::script::core {
     int luaopen_core(lua_State *L);

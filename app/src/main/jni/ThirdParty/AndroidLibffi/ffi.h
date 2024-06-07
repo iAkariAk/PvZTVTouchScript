@@ -16,7 +16,6 @@
 #ifndef LIBFFI_H
 
 #define ARM
-#define CONF_HAVE_LONG_DOUBLE 1
 
 #define LIBFFI_H
 #include "ffitarget.h"
