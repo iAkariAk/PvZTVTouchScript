@@ -27,6 +27,7 @@
 
 #include "Def.h"
 #include "SubstrateHook.h"
+#include "Symbols/Symbols.h"
 
 constexpr char *TAG_FUNCTION_CALL = "XIAN_FUNCTION_CALL";
 constexpr char *TAG_LOGGER_FUNCTION_CALL = "TAG_LOGGER_FUNCTION_CALL";

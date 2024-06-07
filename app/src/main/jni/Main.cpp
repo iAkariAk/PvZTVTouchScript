@@ -30,11 +30,13 @@ void lib_main() {
     GetFunctionAddr();
     CallHook();
 
+    LOGD("env: %p", Symbols::NativeCore::getEnv::invoke);
+
     //Patch
     uintptr_t startAddr = (uintptr_t) Board_UpdateAddr - (uintptr_t) BOARD_UPDATE_ADDR_RELATIVE - 1;
 
-//    ProcMap libMap = KittyMemory::getLibraryMap(targetLibName);
-//    LOGD("对比两个地址：%p,%p",libMap.startAddr,startAddr);
+    ProcMap libMap = KittyMemory::getLibraryMap(targetLibName);
+    LOGD("对比地址：%p　: %p  :  %p", libMap.startAddr, startAddr, Libraries::GameMain::baseAddr);
 
     ProcMap retMap = {0};
     retMap.startAddr = (void *) startAddr;
@@ -905,10 +907,12 @@ Java_com_android_support_CkHomuraMenu_GetCurrentFormation(JNIEnv *env, jobject t
         int mPlantCol = plant->mPlantCol;
         int mRow = plant->mRow;
         bool mIsAsleep = plant->mIsAsleep;
-        bool canHaveLadder = mSeedType == SeedType::Wallnut || mSeedType == SeedType::Tallnut || mSeedType == SeedType::Pumpkinshell;
+        bool canHaveLadder = mSeedType == SeedType::Wallnut || mSeedType == SeedType::Tallnut ||
+                             mSeedType == SeedType::Pumpkinshell;
         bool canBeAsleep = Plant_IsNocturnal(mSeedType);
         bool wakeUp = canBeAsleep && !mIsAsleep;
-        bool imitaterMorphed = mSeedType == SeedType::Imitater || mImitaterType == SeedType::Imitater;
+        bool imitaterMorphed =
+                mSeedType == SeedType::Imitater || mImitaterType == SeedType::Imitater;
         bool ladder = canHaveLadder && Board_GetLadderAt(board, mPlantCol, mRow) != NULL;
         int key = mSeedType | (wakeUp << 6) | (imitaterMorphed << 7) | (ladder << 8);
         int value = mPlantCol | (mRow << 4);
@@ -955,12 +959,14 @@ Java_com_transmension_mobile_EnhanceActivity_nativeIsInGame(JNIEnv *env, jclass 
     if (board != NULL && mFocusWidget == board) {
         return true;
     }
-    SeedChooserScreen* seedChooserScreen = lawnApp->mSeedChooserScreen;
-    if (LawnApp_IsCoopMode(lawnApp) && seedChooserScreen != NULL && mFocusWidget == seedChooserScreen) {
+    SeedChooserScreen *seedChooserScreen = lawnApp->mSeedChooserScreen;
+    if (LawnApp_IsCoopMode(lawnApp) && seedChooserScreen != NULL &&
+        mFocusWidget == seedChooserScreen) {
         return true;
     }
 
-    if (lawnApp->mGameMode == GameMode::TwoPlayerVS && lawnApp->mVSSetupScreen != NULL && lawnApp->mVSSetupScreen[74] == 3) {
+    if (lawnApp->mGameMode == GameMode::TwoPlayerVS && lawnApp->mVSSetupScreen != NULL &&
+        lawnApp->mVSSetupScreen[74] == 3) {
         return true;
     }
     return false;
@@ -981,7 +987,8 @@ Java_com_transmension_mobile_EnhanceActivity_nativeSendButtonEvent(JNIEnv *env, 
     int *mWidgetManager = lawnApp->mWidgetManager;
     Sexy::Widget *mFocusWidget = (Sexy::Widget *) mWidgetManager[40];
     if (board != NULL && mFocusWidget == board) {
-        GamepadControls *gamepadControls = playerIndex ? board->mGamepadControls2 : board->mGamepadControls1;
+        GamepadControls *gamepadControls = playerIndex ? board->mGamepadControls2
+                                                       : board->mGamepadControls1;
         if (!playerIndex) {
             if (is_key_down) {
                 switch (buttonCode) {
@@ -1063,18 +1070,19 @@ Java_com_transmension_mobile_EnhanceActivity_nativeSendButtonEvent(JNIEnv *env, 
         }
         return;
     }
-    SeedChooserScreen* seedChooserScreen = lawnApp->mSeedChooserScreen;
-    if ( is_key_down && LawnApp_IsCoopMode(lawnApp) && seedChooserScreen != NULL && mFocusWidget == seedChooserScreen) {
-        SeedChooserScreen_GameButtonDown(seedChooserScreen,buttonCode,playerIndex);
+    SeedChooserScreen *seedChooserScreen = lawnApp->mSeedChooserScreen;
+    if (is_key_down && LawnApp_IsCoopMode(lawnApp) && seedChooserScreen != NULL &&
+        mFocusWidget == seedChooserScreen) {
+        SeedChooserScreen_GameButtonDown(seedChooserScreen, buttonCode, playerIndex);
         return;
     }
 
-    int* theVSSetupScreen = lawnApp->mVSSetupScreen;
-    if (is_key_down && lawnApp->mGameMode == GameMode::TwoPlayerVS && theVSSetupScreen != NULL && theVSSetupScreen[74] == 3) {
-        VSSetupMenu_GameButtonDown(theVSSetupScreen,buttonCode,playerIndex,0);
+    int *theVSSetupScreen = lawnApp->mVSSetupScreen;
+    if (is_key_down && lawnApp->mGameMode == GameMode::TwoPlayerVS && theVSSetupScreen != NULL &&
+        theVSSetupScreen[74] == 3) {
+        VSSetupMenu_GameButtonDown(theVSSetupScreen, buttonCode, playerIndex, 0);
         return;
     }
-
 
 
 }

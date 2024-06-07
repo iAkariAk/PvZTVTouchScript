@@ -1063,6 +1063,7 @@ void *vTableForMainMenuAddr;
 void *Native_AudioOutput_setupAddr;
 void *Native_AudioOutput_shutdownAddr;
 void *Native_AudioOutput_writeAddr;
+void *Native_getEnv_Addr;
 void *j_AGAudioWriteAddr;
 
 unsigned int gLibBaseOffset = 0;
@@ -2150,6 +2151,7 @@ bool GetFunctionAddr() {
     Native_AudioOutput_setupAddr = dlsym(handle1, "_ZN6Native11AudioOutput5setupEiii");
     Native_AudioOutput_shutdownAddr = dlsym(handle1, "_ZN6Native11AudioOutput8shutdownEv");
     Native_AudioOutput_writeAddr = dlsym(handle1, "_ZN6Native11AudioOutput5writeEPKvi");
+    Native_getEnv_Addr = dlsym(handle1, "_ZNK6Native9NativeApp6getEnvEv");
     j_AGAudioWriteAddr =  (void *) ((uintptr_t) Board_UpdateAddr - (uintptr_t) BOARD_UPDATE_ADDR_RELATIVE + (uintptr_t) J_AUDIOWRITE_ADDR_RELATIVE);
     return true;
 }
