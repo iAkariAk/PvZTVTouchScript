@@ -652,20 +652,13 @@ namespace fairy::script {
     std::ofstream fout;
 
     inline void LogToJava(const char *tag, const char *level, const char *message) {
-        auto jenv = utils::GetJniEnv();
-        auto clazz = jenv->FindClass("com/fairy/free/game/script/FairyScript");
-        auto methodId = jenv->GetStaticMethodID(clazz, "printForNative",
-                                                "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
-        auto tagJStr = jenv->NewStringUTF(tag);
-        auto messageJStr = jenv->NewStringUTF(message);
-        auto levelJStr = jenv->NewStringUTF(level);
-        jenv->CallStaticVoidMethod(clazz, methodId, tagJStr, levelJStr, messageJStr);
+        JNIInteraction::SendPacket("LogToJava", tag, level, message);
     }
 
     int LuaCall_log(lua_State *L) {
-        const char *tag = luaL_optlstring(L, 1, nullptr, nullptr);
-        const char *level = luaL_optlstring(L, 2, nullptr, nullptr);
-        const char *message = luaL_optlstring(L, 3, nullptr, nullptr);
+        auto tag = luaL_optlstring(L, 1, nullptr, nullptr);
+        auto level = luaL_optlstring(L, 2, nullptr, nullptr);
+        auto message = luaL_optlstring(L, 3, nullptr, nullptr);
         LogToJava(tag, level, message);
         return 0;
     }
@@ -756,7 +749,7 @@ namespace fairy::script {
         lua_register(lua_state, "dlopen", LuaCall_dlopen);
         lua_register(lua_state, "dlsym", LuaCall_dlsym);
         lua_register(lua_state, "dlclose", LuaCall_dlclose);
-        utils::LogDebug("finish loading global function");
+
         return true;
     }
 }

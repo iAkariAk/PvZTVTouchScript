@@ -43,6 +43,7 @@ import com.fairy.tv.floating.FloatingController;
 import com.fairy.tv.floating.FloatingLauncher;
 import com.fairy.tv.floating.weight.FloatingDraggableAreas;
 import com.fairy.tv.script.FairyScript;
+import com.fairy.tv.script.LogMessage;
 import com.trans.pvztv.R;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -57,7 +58,10 @@ import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Locale;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class EnhanceActivity extends MainActivity {
 
@@ -635,14 +639,23 @@ public class EnhanceActivity extends MainActivity {
                 FairyScript.submitExecutionTask(Long.toString(System.currentTimeMillis()), inputEdit.getText().toString());
             });
 
-            var messagesAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_activated_1);
+            var messages = new LinkedList<>();
+            var messagesAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_activated_1, messages);
+            Consumer<LogMessage> observer = message -> {
+                runOnUiThread(() -> {
+                    if (messagesAdapter.getCount() > 500) {
+                        for (int i = 500; i < messagesAdapter.getCount(); i++) {
+                            messagesAdapter.remove(messagesAdapter.getItem(i));
+                        }
+                    }
+                    messagesAdapter.add(message.message());
+                });
+            };
+            FairyScript.logMessageLiveData.addObserver(observer);
             var messagesView = new ListView(this);
             messagesView.setDividerHeight(0);
             messagesView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 400));
             messagesView.setAdapter(messagesAdapter);
-            for (int i = 0; i < 10; i++) {
-                messagesAdapter.add("HIHI");
-            }
 
             consoleLayout.addView(messagesView);
             consoleLayout.addView(inputEdit);
@@ -652,6 +665,9 @@ public class EnhanceActivity extends MainActivity {
             scrollView.addView(consoleLayout);
             new AlertDialog.Builder(this)
                     .setView(scrollView)
+                    .setOnCancelListener(v3 ->{
+                        FairyScript.logMessageLiveData.removeObserver(observer);
+                    })
                     .create()
                     .show();
         });

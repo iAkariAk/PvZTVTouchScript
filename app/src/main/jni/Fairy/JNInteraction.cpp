@@ -51,7 +51,7 @@ Java_com_fairy_tv_FairyNative_receivePacket(JNIEnv *env, jclass clazz, jstring n
         const auto &packet = JNIInteraction::ReceivePacket(fairy::utils::JStringToString(env, name));
         return env->NewStringUTF((packet.first + ":" + packet.second).c_str());
     } catch (const std::exception& e) {
-        fairy::utils::LogError(e.what());
+//        fairy::utils::LogError(e.what());
         return nullptr;
     }
 }

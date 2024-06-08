@@ -27,15 +27,13 @@ android {
 //        }
 //    }
     signingConfigs {
-//        release {
-//            storeFile = file('D:\\key.keystore') // Keystore文件的路径
-//            storePassword 'wewewe' // Keystore密码
-//            keyAlias 'key0' // Key别名
-//            keyPassword 'wewewe' // Key密码
-//        }
+        create("common") {
+
+        }
     }
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("debug")
             isShrinkResources = false
             isMinifyEnabled = true
             proguardFiles(
