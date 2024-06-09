@@ -1,5 +1,7 @@
 package com.fairy.tv.script;
 
+import android.annotation.SuppressLint;
+
 import com.fairy.tv.MyApplication;
 import com.fairy.tv.util.Jsons;
 
@@ -13,8 +15,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ScriptManager {
+    @SuppressLint("NewApi")
     private static final Path ROOT_DIR = MyApplication.INSTANCE.getExternalFilesDir("scripts").toPath();
 
+    @SuppressLint("NewApi")
     public static List<ScriptManifest> list() {
         try {
             return Files.list(ROOT_DIR)
@@ -32,6 +36,7 @@ public class ScriptManager {
         }
     }
 
+    @SuppressLint("NewApi")
     public static void loadAll() {
         list().stream()
                 .map(manifest -> ROOT_DIR.resolve(manifest.id()))

@@ -37,6 +37,8 @@ import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
+import androidx.appcompat.widget.AppCompatImageView;
+
 import com.android.support.CkHomuraMenu;
 import com.fairy.tv.FairyNative;
 import com.fairy.tv.floating.FloatingController;
@@ -712,7 +714,7 @@ public class EnhanceActivity extends MainActivity {
 
 
     //方向键单独自定义一个类，这样方便我们自定义它
-    public class CustomView extends ImageView implements View.OnTouchListener {
+    public class CustomView extends AppCompatImageView implements View.OnTouchListener {
 
         private final Paint paint;      // 用于绘制的画笔
         private int cellWidth;          // 单元格宽度

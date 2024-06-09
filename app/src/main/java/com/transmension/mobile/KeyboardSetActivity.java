@@ -20,6 +20,8 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.widget.AppCompatTextView;
+
 import com.trans.pvztv.R;
 
 public class KeyboardSetActivity extends Activity {
@@ -29,7 +31,7 @@ public class KeyboardSetActivity extends Activity {
     private String[] preferenceIntros1P = null;
     private MyTextView keyToSet = null;
 
-    static class MyTextView extends TextView {
+    static class MyTextView extends AppCompatTextView {
 
         public final int preferenceId;
 
