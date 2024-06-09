@@ -100,6 +100,22 @@ namespace fairy::script {
                 utils::LogDebug("lua execute -> %s", result);
             }
         } catch (...) {}
+        try {
+            auto packet = JNIInteraction::ReceivePacket("ScriptExecuteFileTask");
+            auto &content = packet.second;
+            auto separatorIndex = content.find(":");
+            auto id = content.substr(0, separatorIndex);
+            auto path = content.substr(separatorIndex + 1);
+            int rc = luaL_dofile(lua_state, path.c_str());
+            const char *result;
+            if (rc != 0) {
+                result = lua_tostring(lua_state, -1);
+                utils::LogError("lua execute -> %s", result);
+            } else {
+                result = "Success";
+                utils::LogDebug("lua execute -> %s", result);
+            }
+        } catch (...) {}
     }
 
     void ReleaseScriptsInAsset() {

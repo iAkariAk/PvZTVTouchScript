@@ -20,7 +20,9 @@ public class FairyScript {
         FairyNative.sendPacket("ScriptExecuteTask", id + ":" + code);
     }
 
-    public static native void submitFileExecutionTask(String id, String path);
+    public static void submitFileExecutionTask(String id, String path) {
+        FairyNative.sendPacket("ScriptExecuteFileTask", id + ":" + path);
+    }
 
     static {
         PacketDispatcher.registerConsumer("LogToJava", packet -> {

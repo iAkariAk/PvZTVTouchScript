@@ -158,6 +158,7 @@
     <string name="secondplayer_default">默认</string>
     <string name="secondplayer_edit">重新设置</string>
     <string name="secondplayer_edit_toast">请按下新的按键</string>
+    <string name="title_activity_my_application">MyApplication</string>
 
 
 </resources>

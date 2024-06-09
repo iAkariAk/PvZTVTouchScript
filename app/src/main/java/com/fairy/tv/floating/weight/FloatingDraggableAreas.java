@@ -7,7 +7,7 @@ import android.view.View;
 import com.fairy.tv.floating.FloatingController;
 
 public class FloatingDraggableAreas {
-    private static final long REQUIRE_TIME_DRAG = 150;
+    private static final long REQUIRE_TIME_DRAG = 120;
     public static void asFloatingDraggableArea(View view, FloatingController floatingController) {
         view.setOnTouchListener(new View.OnTouchListener() {
 

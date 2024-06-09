@@ -44,6 +44,8 @@ import com.fairy.tv.floating.FloatingLauncher;
 import com.fairy.tv.floating.weight.FloatingDraggableAreas;
 import com.fairy.tv.script.FairyScript;
 import com.fairy.tv.script.LogMessage;
+import com.fairy.tv.script.ScriptConsole;
+import com.fairy.tv.script.ScriptManager;
 import com.trans.pvztv.R;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -619,68 +621,70 @@ public class EnhanceActivity extends MainActivity {
     }
 
     private void registerFloating() {
-        var container = new FrameLayout(this);
-        var controller = new FloatingController(new WeakReference<>(this), container, FloatingController.defaultLayoutParams());
-        var btn = new Button(this);
-        btn.setBackgroundColor(Color.RED);
-        btn.setText("LuaConsole");
-        FloatingDraggableAreas.asFloatingDraggableArea(btn, controller);
-
-        btn.setOnClickListener(v -> {
-            var consoleLayout = new LinearLayout(this);
-            consoleLayout.setBackgroundColor(0xFF28292E);
-            consoleLayout.setOrientation(LinearLayout.VERTICAL);
-            var inputEdit = new EditText(this);
-            inputEdit.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 200));
-            var executeBtn = new Button(this);
-            executeBtn.setText("execute");
-            executeBtn.setBackgroundColor(0xFF3574F0);
-            executeBtn.setOnClickListener(v2 -> {
-                FairyScript.submitExecutionTask(Long.toString(System.currentTimeMillis()), inputEdit.getText().toString());
-            });
-
-            var messages = new LinkedList<>();
-            var messagesAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_activated_1, messages);
-            Consumer<LogMessage> observer = message -> {
-                runOnUiThread(() -> {
-                    if (messagesAdapter.getCount() > 500) {
-                        for (int i = 500; i < messagesAdapter.getCount(); i++) {
-                            messagesAdapter.remove(messagesAdapter.getItem(i));
-                        }
-                    }
-                    messagesAdapter.add(message.message());
-                });
-            };
-            FairyScript.logMessageLiveData.addObserver(observer);
-            var messagesView = new ListView(this);
-            messagesView.setDividerHeight(0);
-            messagesView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 400));
-            messagesView.setAdapter(messagesAdapter);
-
-            consoleLayout.addView(messagesView);
-            consoleLayout.addView(inputEdit);
-            consoleLayout.addView(executeBtn);
-
-            var scrollView = new ScrollView(this);
-            scrollView.addView(consoleLayout);
-            new AlertDialog.Builder(this)
-                    .setView(scrollView)
-                    .setOnCancelListener(v3 ->{
-                        FairyScript.logMessageLiveData.removeObserver(observer);
-                    })
-                    .create()
-                    .show();
-        });
-        container.addView(btn);
-
-
-        var callbacks = new FloatingLauncher(controller);
-        getApplication().registerActivityLifecycleCallbacks(callbacks);
+        new ScriptConsole(this).register();
+//        var container = new FrameLayout(this);
+//        var controller = new FloatingController(new WeakReference<>(this), container, FloatingController.defaultLayoutParams());
+//        var btn = new Button(this);
+//        btn.setBackgroundColor(Color.RED);
+//        btn.setText("LuaConsole");
+//        FloatingDraggableAreas.asFloatingDraggableArea(btn, controller);
+//
+//        btn.setOnClickListener(v -> {
+//            var consoleLayout = new LinearLayout(this);
+//            consoleLayout.setBackgroundColor(0xFF28292E);
+//            consoleLayout.setOrientation(LinearLayout.VERTICAL);
+//            var inputEdit = new EditText(this);
+//            inputEdit.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 200));
+//            var executeBtn = new Button(this);
+//            executeBtn.setText("execute");
+//            executeBtn.setBackgroundColor(0xFF3574F0);
+//            executeBtn.setOnClickListener(v2 -> {
+//                FairyScript.submitExecutionTask(Long.toString(System.currentTimeMillis()), inputEdit.getText().toString());
+//            });
+//
+//            var messages = new LinkedList<>();
+//            var messagesAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_activated_1, messages);
+//            Consumer<LogMessage> observer = message -> {
+//                runOnUiThread(() -> {
+//                    if (messagesAdapter.getCount() > 500) {
+//                        for (int i = 500; i < messagesAdapter.getCount(); i++) {
+//                            messagesAdapter.remove(messagesAdapter.getItem(i));
+//                        }
+//                    }
+//                    messagesAdapter.add(message.message());
+//                });
+//            };
+//            FairyScript.logMessageLiveData.addObserver(observer);
+//            var messagesView = new ListView(this);
+//            messagesView.setDividerHeight(0);
+//            messagesView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 400));
+//            messagesView.setAdapter(messagesAdapter);
+//
+//            consoleLayout.addView(messagesView);
+//            consoleLayout.addView(inputEdit);
+//            consoleLayout.addView(executeBtn);
+//
+//            var scrollView = new ScrollView(this);
+//            scrollView.addView(consoleLayout);
+//            new AlertDialog.Builder(this)
+//                    .setView(scrollView)
+//                    .setOnCancelListener(v3 ->{
+//                        FairyScript.logMessageLiveData.removeObserver(observer);
+//                    })
+//                    .create()
+//                    .show();
+//        });
+//        container.addView(btn);
+//
+//
+//        var callbacks = new FloatingLauncher(controller);
+//        getApplication().registerActivityLifecycleCallbacks(callbacks);
     }
 
     private void initFairy() {
         FairyNative.setAssetManager(getAssets());
         FairyNative.setCatchDir(getCacheDir().getAbsolutePath());
+        ScriptManager.loadAll();
     }
 
     //用于按下、抬起按钮时的缩放动画
