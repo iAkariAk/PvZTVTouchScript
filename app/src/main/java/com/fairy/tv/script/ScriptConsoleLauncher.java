@@ -15,9 +15,12 @@ import com.fairy.tv.floating.widget.FloatingDraggableAreas;
 import com.fairy.tv.util.Pixels;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputEditText;
 import com.trans.pvztv.databinding.FloatingConsoleBinding;
 
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 public class ScriptConsoleLauncher extends FloatingLauncher {
     private final Activity activity;
@@ -51,10 +54,10 @@ public class ScriptConsoleLauncher extends FloatingLauncher {
         viewCollapsed.setText("LuaConsole");
         viewCollapsed.setTypeface(Typeface.SERIF);
         FloatingDraggableAreas.makeDraggable(viewCollapsed, floatingController);
-        FloatingDraggableAreas.makeDraggable(binding.title, floatingController);
+        FloatingDraggableAreas.makeDraggable(binding.topBar, floatingController);
         rootContainer.addView(viewCollapsed);
 
-        binding.title.setOnClickListener(v -> {
+        binding.topBar.setOnClickListener(v -> {
             viewExpended.setVisibility(View.GONE);
             viewCollapsed.setVisibility(View.VISIBLE);
         });
@@ -62,6 +65,19 @@ public class ScriptConsoleLauncher extends FloatingLauncher {
         viewCollapsed.setOnClickListener(v -> {
             viewExpended.setVisibility(View.VISIBLE);
             viewCollapsed.setVisibility(View.GONE);
+        });
+
+        binding.postScript.setOnClickListener(v -> {
+            var viewPostField = new TextInputEditText(activity);
+            viewPostField.setHint("Please typing...");
+            new MaterialAlertDialogBuilder(activity)
+                    .setTitle("Post Script")
+                    .setView(viewPostField)
+                    .setPositiveButton("Post", (dialog, which) -> {
+                        var code = Objects.requireNonNull(viewPostField.getText()).toString();
+                        FairyScript.submitExecutionTask(Integer.toString(code.hashCode()), code);;
+                    })
+                    .show();
         });
     }
 
