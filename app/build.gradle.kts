@@ -71,7 +71,7 @@ android {
     }
 
     buildFeatures {
-        viewBinding = false
+        viewBinding = true
     }
 
     packaging {

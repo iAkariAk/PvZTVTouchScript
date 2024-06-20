@@ -1,11 +1,9 @@
 package com.transmension.mobile;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.hardware.SensorManager;
@@ -23,30 +21,17 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.ScrollView;
-import android.widget.Toast;
 
 import androidx.appcompat.widget.AppCompatImageView;
 
 import com.android.support.CkHomuraMenu;
 import com.fairy.tv.FairyNative;
-import com.fairy.tv.floating.FloatingController;
-import com.fairy.tv.floating.FloatingLauncher;
-import com.fairy.tv.floating.weight.FloatingDraggableAreas;
-import com.fairy.tv.script.FairyScript;
-import com.fairy.tv.script.LogMessage;
-import com.fairy.tv.script.ScriptConsole;
+import com.fairy.tv.script.ScriptConsoleLauncher;
 import com.fairy.tv.script.ScriptManager;
 import com.trans.pvztv.R;
 
@@ -58,14 +43,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Locale;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class EnhanceActivity extends MainActivity {
 
@@ -623,7 +604,8 @@ public class EnhanceActivity extends MainActivity {
     }
 
     private void registerFloating() {
-        new ScriptConsole(this).register();
+        var launcher = new ScriptConsoleLauncher(this);
+        getApplication().registerActivityLifecycleCallbacks(launcher);
 //        var container = new FrameLayout(this);
 //        var controller = new FloatingController(new WeakReference<>(this), container, FloatingController.defaultLayoutParams());
 //        var btn = new Button(this);
