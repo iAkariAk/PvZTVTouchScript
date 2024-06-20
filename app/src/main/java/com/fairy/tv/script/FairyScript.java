@@ -3,21 +3,20 @@ package com.fairy.tv.script;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.fairy.tv.FairyNative;
 import com.fairy.tv.PacketDispatcher;
 
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.stream.Collectors;
 
 /**
  */
 public class FairyScript {
     private static final MutableLiveData<LogMessage> _logMessageLiveData = new MutableLiveData<>();
     public static final LiveData<LogMessage> logMessageLiveData = _logMessageLiveData;
+    private static final MutableLiveData<ExcuteResult> _executeResultLiveData = new MutableLiveData<>();
+    public static final LiveData<ExcuteResult> executeResultLiveData = _executeResultLiveData;
     public static void submitExecutionTask(String id, String code) {
         FairyNative.sendPacket("ScriptExecuteTask", id + ":" + code);
     }
@@ -28,13 +27,12 @@ public class FairyScript {
 
     static {
         PacketDispatcher.registerConsumer("LogToJava", packet -> {
-            var parts = packet.content().split(":");
+            var parts = packet.spiltContent();
             if (parts.length >= 3) {
 
                 var tagStr = parts[0];
                 var levelStr = parts[1];
-                var messageStr = Arrays.stream(parts, 2, parts.length)
-                        .collect(Collectors.joining());
+                var messageStr = packet.spiltAndDropContent(2);
                 var level = LogMessage.Level.Info;
                 try {
                     level = LogMessage.Level.valueOf(levelStr);
@@ -44,6 +42,16 @@ public class FairyScript {
                 }
                 var log = new LogMessage(tagStr, level, messageStr);
                 _logMessageLiveData.postValue(log);
+            }
+        });
+        PacketDispatcher.registerConsumer("ResultForScriptExecute", packet -> {
+            var parts = packet.spiltContent();
+            if (parts.length >= 2) {
+
+                var source = parts[0];
+                var content = packet.spiltAndDropContent(1);
+                var result = new ExcuteResult(source, content);
+                _executeResultLiveData.postValue(result);
             }
         });
     }

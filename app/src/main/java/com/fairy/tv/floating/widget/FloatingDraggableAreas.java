@@ -3,12 +3,17 @@ package com.fairy.tv.floating.widget;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.fairy.tv.floating.FloatingController;
+
+import java.util.function.Consumer;
 
 public class FloatingDraggableAreas {
     private static final long MIN_DRAG_DURATION_MS = 115;
 
-    public static void makeDraggable(View view, FloatingController floatingController) {
+    public static void makeDraggable(@NonNull View view, @NonNull FloatingController floatingController, @Nullable Consumer<MotionEvent> onDragListener) {
         view.setOnTouchListener(new View.OnTouchListener() {
 
             private long lastTouchTime;
@@ -33,6 +38,9 @@ public class FloatingDraggableAreas {
                             int offsetY = Math.round(event.getRawY() - lastTouchY);
 
                             floatingController.offset(offsetX, offsetY);
+                            if (onDragListener != null) {
+                                onDragListener.accept(event);
+                            }
                             lastTouchX = event.getRawX();
                             lastTouchY = event.getRawY();
                         }
@@ -49,5 +57,9 @@ public class FloatingDraggableAreas {
                 }
             }
         });
+    }
+
+    public static void makeDraggable(View view, FloatingController floatingController) {
+        makeDraggable(view, floatingController, null);
     }
 }

@@ -1,6 +1,7 @@
 package com.fairy.tv.script;
 
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -46,6 +47,9 @@ public class LogBufferItemAdapter extends RecyclerView.Adapter<LogBufferItemAdap
         public MyHolder(@NonNull MaterialTextView itemView) {
             super(itemView);
             this.itemView = itemView;
+            itemView.setTypeface(Typeface.MONOSPACE);
+            itemView.setTextSize(13);
+
         }
     }
 }

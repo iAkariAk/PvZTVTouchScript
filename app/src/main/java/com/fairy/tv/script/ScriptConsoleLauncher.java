@@ -6,6 +6,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import com.fairy.tv.util.Pixels;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.trans.pvztv.databinding.FloatingConsoleBinding;
 
@@ -32,12 +34,13 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 
 public class ScriptConsoleLauncher extends FloatingLauncher {
-    private final Activity activity;
+    private static final String TAG = "ScriptConsoleLauncher";
+    private final AppCompatActivity activity;
     private final FloatingController floatingController;
     private final FrameLayout rootContainer;
     private FloatingConsoleBinding binding;
 
-    public ScriptConsoleLauncher(Activity activity) {
+    public ScriptConsoleLauncher(AppCompatActivity activity) {
         super(new FloatingController(
                 new WeakReference<>(activity),
                 new FrameLayout(activity),
@@ -52,6 +55,8 @@ public class ScriptConsoleLauncher extends FloatingLauncher {
     @Override
     public void onActivityCreated(@NonNull Activity activity, Bundle savedInstanceState) {
         super.onActivityCreated(activity, savedInstanceState);
+
+        if (!(activity instanceof AppCompatActivity compatActivity)) return;
 
         var viewExpended = new MaterialCardView(this.activity);
         viewExpended.setLayoutParams(new FrameLayout.LayoutParams((int) Pixels.dpToPx(this.activity, 250), (int) Pixels.dpToPx(this.activity, 350)));
@@ -82,10 +87,10 @@ public class ScriptConsoleLauncher extends FloatingLauncher {
             var viewPostField = new TextInputEditText(activity);
             viewPostField.setOnLongClickListener(v1 -> {
                 new FullInputFragment(viewPostField)
-                        .show(((AppCompatActivity) activity).getSupportFragmentManager(), "FullInputFragment");
+                        .show(compatActivity.getSupportFragmentManager(), "FullInputFragment");
                 return true;
             });
-            viewPostField.setHint("Please typing...");
+            viewPostField.setHint("Try typing...");
             new MaterialAlertDialogBuilder(activity)
                     .setTitle("Post Script")
                     .setView(viewPostField)
@@ -96,8 +101,13 @@ public class ScriptConsoleLauncher extends FloatingLauncher {
                     .show();
         });
 
+        FairyScript.executeResultLiveData.observe(compatActivity, excuteResult -> {
+            Log.i(TAG, "Make a snackbar: " + excuteResult.toString());
+            Snackbar.make(viewExpendedContent, String.format("[%s]: %s", excuteResult.source(), excuteResult.content()), Snackbar.LENGTH_LONG).show();
+        });
+
         var logMessageList = new LimitedList<LogMessage>(300);
-        FairyScript.logMessageLiveData.observe((AppCompatActivity) activity, e -> {
+        FairyScript.logMessageLiveData.observe(compatActivity, e -> {
             logMessageList.add(e);
             Objects.requireNonNull(binding.printBuffer.getAdapter()).notifyDataSetChanged();
         });

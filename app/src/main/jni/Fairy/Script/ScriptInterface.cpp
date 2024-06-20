@@ -99,6 +99,7 @@ namespace fairy::script {
                 result = "Success";
                 utils::LogDebug("lua execute -> %s", result);
             }
+            JNIInteraction::SendPacket("ResultForScriptExecute", id, result);
         } catch (...) {}
         try {
             auto packet = JNIInteraction::ReceivePacket("ScriptExecuteFileTask");
@@ -115,6 +116,7 @@ namespace fairy::script {
                 result = "Success";
                 utils::LogDebug("lua execute -> %s", result);
             }
+            JNIInteraction::SendPacket("ResultForScriptExecute", id, result);
         } catch (...) {}
     }
 
