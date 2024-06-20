@@ -28,10 +28,12 @@ import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.io.File;
 import java.util.Set;
 
-public class NativeActivity extends Activity {
+public class NativeActivity extends AppCompatActivity {
     public static int ACTION_OPEN = 0;
     public static int ACTION_SEND = 1;
     public static final int MBB_CANCEL = 2;

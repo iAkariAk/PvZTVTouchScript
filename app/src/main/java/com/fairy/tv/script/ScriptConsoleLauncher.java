@@ -1,17 +1,26 @@
 package com.fairy.tv.script;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.fairy.tv.floating.FloatingController;
 import com.fairy.tv.floating.FloatingLauncher;
 import com.fairy.tv.floating.widget.FloatingDraggableAreas;
+import com.fairy.tv.util.LimitedList;
 import com.fairy.tv.util.Pixels;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
@@ -39,9 +48,11 @@ public class ScriptConsoleLauncher extends FloatingLauncher {
         this.rootContainer = (FrameLayout) floatingController.getView();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onActivityCreated(@NonNull Activity activity, Bundle savedInstanceState) {
         super.onActivityCreated(activity, savedInstanceState);
+
         var viewExpended = new MaterialCardView(this.activity);
         viewExpended.setLayoutParams(new FrameLayout.LayoutParams((int) Pixels.dpToPx(this.activity, 250), (int) Pixels.dpToPx(this.activity, 350)));
         viewExpended.setVisibility(View.GONE);
@@ -69,6 +80,11 @@ public class ScriptConsoleLauncher extends FloatingLauncher {
 
         binding.postScript.setOnClickListener(v -> {
             var viewPostField = new TextInputEditText(activity);
+            viewPostField.setOnLongClickListener(v1 -> {
+                new FullInputFragment(viewPostField)
+                        .show(((AppCompatActivity) activity).getSupportFragmentManager(), "FullInputFragment");
+                return true;
+            });
             viewPostField.setHint("Please typing...");
             new MaterialAlertDialogBuilder(activity)
                     .setTitle("Post Script")
@@ -79,6 +95,14 @@ public class ScriptConsoleLauncher extends FloatingLauncher {
                     })
                     .show();
         });
+
+        var logMessageList = new LimitedList<LogMessage>(300);
+        FairyScript.logMessageLiveData.observe((AppCompatActivity) activity, e -> {
+            logMessageList.add(e);
+            Objects.requireNonNull(binding.printBuffer.getAdapter()).notifyDataSetChanged();
+        });
+        binding.printBuffer.setLayoutManager(new LinearLayoutManager(activity));
+        binding.printBuffer.setAdapter(new LogBufferItemAdapter(logMessageList));
     }
 
     @Override
@@ -87,4 +111,41 @@ public class ScriptConsoleLauncher extends FloatingLauncher {
         binding = null;
     }
 
+    public static class FullInputFragment extends DialogFragment {
+        private final TextInputEditText viewPostField;
+
+        public FullInputFragment(TextInputEditText viewPostField) {
+            this.viewPostField = viewPostField;
+        }
+
+        @Override
+        public void onStart() {
+            super.onStart();
+            if (getDialog() != null && getDialog().getWindow() != null) {
+                getDialog().getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            }
+        }
+
+        @NonNull
+        @Override
+        public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+            var input = new TextInputEditText(requireContext());
+            input.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            input.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    viewPostField.setText(s);
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                }
+            });
+            return input;
+        }
+    }
 }
