@@ -91,7 +91,7 @@ dependencies {
     implementation("com.squareup.moshi:moshi:1.15.1")
     implementation("androidx.core:core:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("androidx.fragment:fragment:1.7.1")
+    implementation("androidx.fragment:fragment:1.8.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.annotation:annotation:1.8.0")
     implementation("com.google.android.material:material:1.12.0")
