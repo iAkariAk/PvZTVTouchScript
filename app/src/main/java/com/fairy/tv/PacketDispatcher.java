@@ -1,5 +1,7 @@
 package com.fairy.tv;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import java.util.LinkedList;
@@ -10,24 +12,21 @@ public class PacketDispatcher {
     private static final LinkedList<ConsumeTarget> consumerTargets = new LinkedList<>();
 
     static {
-        new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                synchronized (consumerTargets) {
-                    for (ConsumeTarget target : consumerTargets) {
-                        var packet = Packet.receiveFromNative(target.packetName);
-                        if (packet != null) {
-                            Log.d("Fairy", packet.toString());
-                            target.consumer.accept(packet);
-                        }
+        var looper = Looper.getMainLooper();
+        var handler = new Handler(looper);
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                for (ConsumeTarget target : consumerTargets) {
+                    var packet = Packet.receiveFromNative(target.packetName);
+                    if (packet != null) {
+                        Log.d("Fairy", packet.toString());
+                        target.consumer.accept(packet);
                     }
                 }
+                handler.postDelayed(this, 10);
             }
-        }).start();
+        });
     }
 
     public static void registerConsumer(String packetName, Consumer<Packet> consumer) {
@@ -42,5 +41,6 @@ public class PacketDispatcher {
         }
     }
 
-    private record ConsumeTarget(String packetName, Consumer<Packet> consumer) { }
+    private record ConsumeTarget(String packetName, Consumer<Packet> consumer) {
+    }
 }
