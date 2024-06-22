@@ -163,6 +163,7 @@
     <string name="script_manager_import">Import</string>
     <string name="console_post">PostScript</string>
     <string name="console">Console</string>
+    <string name="uninstall">Uninstall</string>
 
 
 </resources>

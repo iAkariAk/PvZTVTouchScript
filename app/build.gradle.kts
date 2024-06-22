@@ -52,7 +52,8 @@ android {
     applicationVariants.all { variant ->
         buildOutputs.all {
             this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
-            outputFileName = "PvZTVTouch-${variant.buildType.name.uppercaseFirstChar()}-${variant.versionName}"
+            outputFileName =
+                "PvZTVTouch-${variant.buildType.name.uppercaseFirstChar()}-${variant.versionName}"
         }
         true
     }
@@ -93,6 +94,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.fragment:fragment:1.8.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.annotation:annotation:1.8.0")
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime:2.8.2")
