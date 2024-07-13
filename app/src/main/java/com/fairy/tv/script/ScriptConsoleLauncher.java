@@ -6,7 +6,6 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +25,6 @@ import com.fairy.tv.util.Pixels;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.trans.pvztv.databinding.FloatingConsoleBinding;
 
@@ -96,14 +94,10 @@ public class ScriptConsoleLauncher extends FloatingLauncher {
                     .setView(viewPostField)
                     .setPositiveButton("Post", (dialog, which) -> {
                         var code = Objects.requireNonNull(viewPostField.getText()).toString();
-                        FairyScript.submitExecutionTask(Integer.toString(code.hashCode()), code);;
+                        FairyScript.submitExecutionTask(Integer.toString(code.hashCode()), code);
+                        ;
                     })
                     .show();
-        });
-
-        FairyScript.executeResultLiveData.observe(compatActivity, excuteResult -> {
-            Log.i(TAG, "Make a snackbar: " + excuteResult.toString());
-            Snackbar.make(viewExpendedContent, String.format("[%s]: %s", excuteResult.source(), excuteResult.content()), Snackbar.LENGTH_LONG).show();
         });
 
         var logMessageList = new LimitedList<LogMessage>(300);

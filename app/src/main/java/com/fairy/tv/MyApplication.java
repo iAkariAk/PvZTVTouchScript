@@ -12,6 +12,7 @@ public class MyApplication extends Application {
         DynamicColors.applyToActivitiesIfAvailable(this);
         super.onCreate();
         INSTANCE = this;
+        CrashHandler.applyToApplication(this);
     }
 }
 

@@ -31,8 +31,10 @@ import androidx.appcompat.widget.AppCompatImageView;
 
 import com.android.support.CkHomuraMenu;
 import com.fairy.tv.FairyNative;
+import com.fairy.tv.script.FairyScript;
 import com.fairy.tv.script.ScriptConsoleLauncher;
 import com.fairy.tv.script.ScriptManager;
+import com.google.android.material.snackbar.Snackbar;
 import com.trans.pvztv.R;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -611,6 +613,9 @@ public class EnhanceActivity extends MainActivity {
     private void initFairy() {
         FairyNative.setAssetManager(getAssets());
         FairyNative.setCatchDir(getCacheDir().getAbsolutePath());
+        FairyScript.executeResultLiveData.observe(this, excuteResult -> {
+            Snackbar.make(mNativeView, String.format("[%s]: %s", excuteResult.source(), excuteResult.content()), Snackbar.LENGTH_LONG).show();
+        });
         ScriptManager.loadAll();
     }
 

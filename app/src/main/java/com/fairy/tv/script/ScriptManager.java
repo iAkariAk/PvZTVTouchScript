@@ -47,7 +47,7 @@ public class ScriptManager {
     @SuppressLint("NewApi")
     public static void loadAll() {
         list().stream()
-                .map(manifest -> ROOT_DIR.resolve(manifest.id()))
+                .map(manifest -> ROOT_DIR.resolve(manifest.id()).resolve("main.lua"))
                 .forEach(path -> FairyScript.submitFileExecutionTask(Long.toString(System.nanoTime()), path.toAbsolutePath().toString()));
     }
 

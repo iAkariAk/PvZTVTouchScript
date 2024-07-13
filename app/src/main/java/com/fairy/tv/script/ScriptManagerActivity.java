@@ -35,12 +35,14 @@ public class ScriptManagerActivity extends AppCompatActivity {
     private final ScriptAdapter adapter = new ScriptAdapter();
     private final ActivityResultLauncher<String> importLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(), uri -> {
-                try (var zis = new ZipInputStream(getContentResolver().openInputStream(uri))) {
-                    var manifest = adapter.install(zis);
-                    showSnackbar("Imported script: " + manifest.name());
-                } catch (IOException e) {
-                    showSnackbar("Failed to import script: " + e.getMessage());
-                    Log.e(TAG, "Failed to import script", e);
+                if (uri != null) {
+                    try (var zis = new ZipInputStream(getContentResolver().openInputStream(uri))) {
+                        var manifest = adapter.install(zis);
+                        showSnackbar("Imported script: " + manifest.name());
+                    } catch (IOException e) {
+                        showSnackbar("Failed to import script: " + e.getMessage());
+                        Log.e(TAG, "Failed to import script", e);
+                    }
                 }
             });
 
