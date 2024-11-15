@@ -90,7 +90,7 @@ android {
 
 dependencies {
     implementation("com.squareup.moshi:moshi:1.15.1")
-    implementation("androidx.core:core:1.13.1")
+    implementation("androidx.core:core:1.15.0")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.fragment:fragment:1.8.2")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
