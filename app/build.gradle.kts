@@ -101,7 +101,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.2.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
-    implementation("androidx.activity:activity:1.9.3")
+    implementation("androidx.activity:activity:1.10.0")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.3")
 
 }
